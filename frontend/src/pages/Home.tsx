@@ -44,11 +44,11 @@ export default function Home() {
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <Link
               to="/commander"
-              className={buttonVariants({ size: "lg" })}
+              className="inline-flex h-14 items-center justify-center gap-2.5 rounded-full bg-[#2a1810] px-9 text-base font-semibold text-[#faf6f0] shadow-lg transition-colors duration-200 hover:bg-[#8a4b20] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a4b20] focus-visible:ring-offset-2"
               data-testid="nav-commander-btn"
             >
               Commander
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
             </Link>
             <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarClock className="h-4 w-4" /> Créneaux de 08h00 à 20h00

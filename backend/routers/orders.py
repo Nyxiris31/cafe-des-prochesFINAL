@@ -21,10 +21,8 @@ class Drink(BaseModel):
     tagline: str
     image: str
     description: str
-    intensity: str
-    serving_temp: str
+    composition: List[str]
     allergens: str
-    prep_time: str
 
 
 CATALOG: List[Drink] = [
@@ -35,14 +33,11 @@ CATALOG: List[Drink] = [
         tagline="Douceur lactée & espresso délicat",
         image=f"{ASSETS}/f7xy0nv3_Caf%C3%A9%20latte.png",
         description=(
-            "Une alliance harmonieuse entre un espresso fraîchement extrait et un lit généreux "
-            "de lait entier délicatement texturé à la vapeur, surmonté d'une fine couche de "
-            "micro-mousse onctueuse."
+            "Un espresso adouci par un lait chaud délicatement moussé : la boisson la plus douce "
+            "de la carte."
         ),
-        intensity="2/5",
-        serving_temp="Chaud (65°C)",
+        composition=["Lait chaud moussé", "Double espresso"],
         allergens="Lait",
-        prep_time="3-5 min",
     ),
     Drink(
         id="cappuccino",
@@ -51,14 +46,11 @@ CATALOG: List[Drink] = [
         tagline="Mousse aérienne & cacao fin",
         image=f"{ASSETS}/eixmrmi9_Cappuccino.png",
         description=(
-            "Le grand classique italien composé d'un tiers d'espresso corsé, d'un tiers de lait "
-            "chaud velouté et d'un tiers de mousse dense et crémeuse, saupoudré d'un nuage de "
-            "cacao pur."
+            "Le classique italien : un espresso corsé, du lait chaud velouté et une mousse dense "
+            "coiffée de chantilly."
         ),
-        intensity="3/5",
-        serving_temp="Chaud (68°C)",
+        composition=["Lait chaud", "Espresso", "Chantilly"],
         allergens="Lait",
-        prep_time="3-4 min",
     ),
     Drink(
         id="espresso",
@@ -66,14 +58,9 @@ CATALOG: List[Drink] = [
         category="chaudes",
         tagline="Concentré pur & crema dorée",
         image=f"{ASSETS}/8716v30s_Espresso.png",
-        description=(
-            "Une extraction courte sous haute pression révélant les arômes profonds de fèves de "
-            "café torréfiées artisanalement, coiffée d'une épaisse crema couleur noisette."
-        ),
-        intensity="5/5",
-        serving_temp="Très chaud (75°C)",
+        description="Court, intense et aromatique, coiffé d'une crema couleur noisette.",
+        composition=["Espresso serré"],
         allergens="Aucun",
-        prep_time="2 min",
     ),
     Drink(
         id="viennois-chocolat",
@@ -81,14 +68,15 @@ CATALOG: List[Drink] = [
         category="chaudes",
         tagline="Chocolat velouté & chantilly maison",
         image=f"{ASSETS}/sc6hbig2_Viennois%20au%20chocolat.png",
-        description=(
-            "Un chocolat chaud riche fondu à l'ancienne avec des fèves de cacao 70%, couronné "
-            "d'un dôme généreux de crème chantilly vanillée maison et de copeaux de chocolat noir."
-        ),
-        intensity="Gourmand",
-        serving_temp="Chaud (62°C)",
+        description="Un chocolat chaud gourmand, généreusement couronné de chantilly maison.",
+        composition=[
+            "Lait chaud",
+            "Cacao en poudre",
+            "Chantilly",
+            "Chocolat noir",
+            "Topping chocolat",
+        ],
         allergens="Lait",
-        prep_time="4-6 min",
     ),
     Drink(
         id="cafe-latte-glace",
@@ -96,14 +84,9 @@ CATALOG: List[Drink] = [
         category="fraiches",
         tagline="Fraîcheur intense & lait soyeux",
         image=f"{ASSETS}/5wr0zn61_Caf%C3%A9%20latte%20glac%C3%A9.png",
-        description=(
-            "Double espresso versé sur une cascade de glaçons cristallins et de lait frais "
-            "tempéré, relevé d'une pointe de vanille."
-        ),
-        intensity="3/5",
-        serving_temp="Glacé (4°C)",
+        description="Un double espresso versé sur du lait froid et des glaçons.",
+        composition=["Lait froid", "Double espresso", "Glaçons"],
         allergens="Lait",
-        prep_time="3 min",
     ),
 ]
 
@@ -137,8 +120,7 @@ class OrderCreate(BaseModel):
     @field_validator("time")
     @classmethod
     def _half_hour(cls, v: str) -> str:
-        m = re.fullmatch(r"([01]\d|2[0-3]):(00|30)", v)
-        if not m:
+        if not re.fullmatch(r"([01]\d|2[0-3]):(00|30)", v):
             raise ValueError("time must be on a 30-minute slot, e.g. 13:00 or 13:30")
         return v
 

@@ -6,10 +6,8 @@ export interface Drink {
   tagline: string;
   image: string;
   description: string;
-  intensity: string;
-  serving_temp: string;
+  composition: string[];
   allergens: string;
-  prep_time: string;
 }
 
 export interface Order {

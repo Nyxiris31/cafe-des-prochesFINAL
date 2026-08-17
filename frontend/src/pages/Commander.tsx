@@ -250,26 +250,22 @@ export default function Commander() {
           <p className="text-sm leading-relaxed" data-testid="drink-info-description">
             {infoDrink?.description}
           </p>
-          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">Intensité</dt>
-              <dd>{infoDrink?.intensity}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">Service</dt>
-              <dd>{infoDrink?.serving_temp}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">Allergènes</dt>
-              <dd>{infoDrink?.allergens}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Préparation
-              </dt>
-              <dd>{infoDrink?.prep_time}</dd>
-            </div>
-          </dl>
+          <div className="mt-4 rounded-xl border border-border bg-card p-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Composition
+            </p>
+            <ul className="mt-2 space-y-1 text-sm" data-testid="drink-info-composition">
+              {(infoDrink?.composition ?? []).map((c) => (
+                <li key={c} className="flex items-start gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a4b20]" />
+                  {c}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-xs text-muted-foreground" data-testid="drink-info-allergens">
+              Allergènes : {infoDrink?.allergens}
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
 

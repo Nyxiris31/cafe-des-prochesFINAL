@@ -15,6 +15,9 @@ Catalog is hardcoded in `backend/routers/orders.py` (no seed data, no auth).
 - chaudes: cafe-latte, cappuccino, espresso, viennois-chocolat
 - fraiches: cafe-latte-glace (not orderable — category shows "Bientôt disponible")
 
+`Drink` info dialog is intentionally simple: description courte + `composition` (liste d'ingrédients) +
+`allergens`. Pas d'intensité, de température, de % de cacao ni de temps de préparation.
+
 `Order` in Mongo `orders`: id (uuid), drink_id, drink_name, drink_image, date (YYYY-MM-DD),
 time (HH:MM, minutes must be 00 or 30), first_name, note?, created_at (aware UTC).
 
