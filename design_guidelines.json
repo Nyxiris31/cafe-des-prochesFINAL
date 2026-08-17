@@ -1,0 +1,331 @@
+{
+  "theme": "warm_earthy_coffee",
+  "archetype": "ARCHETYPE 1: ORGANIC & EARTHY (Trust, Warmth, Artisanal Calm)",
+  "language": "fr",
+  "colors": {
+    "surfaces": [
+      {
+        "name": "page",
+        "kind": "solid",
+        "bg": "#F7F3EE",
+        "on_bg": "#2A1810",
+        "on_bg_muted": "#6E584D",
+        "roles": {
+          "link": "#8A4B20",
+          "error": "#B43425",
+          "success": "#2D6A4F",
+          "warning": "#B8621B",
+          "accent_badge": "#523223"
+        }
+      },
+      {
+        "name": "kiosk_shell",
+        "kind": "solid",
+        "bg": "#EFE8DC",
+        "on_bg": "#22130C",
+        "on_bg_muted": "#635047",
+        "roles": {
+          "border": "#D8CAB8",
+          "active_category": "#2A1810"
+        }
+      },
+      {
+        "name": "sidebar_rail",
+        "kind": "solid",
+        "bg": "#ECE3D4",
+        "on_bg": "#2A1810",
+        "on_bg_muted": "#705B4F"
+      },
+      {
+        "name": "card_item",
+        "kind": "solid",
+        "bg": "#FFFFFF",
+        "on_bg": "#2A1810",
+        "on_bg_muted": "#6B564A",
+        "roles": {
+          "card_border": "#E8DED1",
+          "info_btn": "#8A4B20"
+        }
+      },
+      {
+        "name": "dialog_modal",
+        "kind": "solid",
+        "bg": "#FAF7F2",
+        "on_bg": "#24150D",
+        "on_bg_muted": "#5F4D43",
+        "roles": {
+          "border": "#E5DACE"
+        }
+      },
+      {
+        "name": "slot_selected",
+        "kind": "solid",
+        "bg": "#2A1810",
+        "on_bg": "#FAF6F0",
+        "on_bg_muted": "#D8CAB8"
+      },
+      {
+        "name": "slot_available",
+        "kind": "solid",
+        "bg": "#FFFFFF",
+        "on_bg": "#2A1810",
+        "on_bg_muted": "#745E52"
+      },
+      {
+        "name": "hero_banner",
+        "kind": "image",
+        "contrast_against": "#26160F",
+        "guarantee": "scrim: linear-gradient(to right, rgba(38,22,15,0.85) 0%, rgba(42,24,16,0.65) 60%, rgba(42,24,16,0.4) 100%)",
+        "on_bg": "#FAF5EE",
+        "on_bg_muted": "#E5D6C5",
+        "roles": {
+          "highlight": "#F0C28D",
+          "badge": "#FFFFFF"
+        }
+      },
+      {
+        "name": "pill_badge",
+        "kind": "solid",
+        "bg": "#E8DDD0",
+        "on_bg": "#3D2417",
+        "on_bg_muted": "#6E5649"
+      }
+    ],
+    "accent": "#8A4B20",
+    "on_accent": "#FFFFFF",
+    "accent_hover": "#6E3713",
+    "palette": {
+      "cream_bg": "#F7F3EE",
+      "cream_kiosk": "#EFE8DC",
+      "sidebar_rail": "#ECE3D4",
+      "warm_white": "#FAF7F2",
+      "espresso_black": "#2A1810",
+      "deep_roast": "#1E110B",
+      "roasted_caramel": "#8A4B20",
+      "latte_taupe": "#D8CAB8",
+      "muted_mocha": "#6E584D",
+      "gold_foam": "#DFB272",
+      "sage_available": "#2D6A4F",
+      "warm_border": "#E5DACD"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Playfair Display, serif",
+      "body": "DM Sans, sans-serif",
+      "fontsource_imports": [
+        "@import \"@fontsource-variable/playfair-display\";",
+        "@import \"@fontsource-variable/dm-sans\";"
+      ]
+    },
+    "scale_px": {
+      "display": 56,
+      "h1": 44,
+      "h2": 32,
+      "h3": 24,
+      "h4": 20,
+      "body": 16,
+      "caption": 14
+    },
+    "rules": {
+      "headings": "font-serif tracking-tight text-[#2A1810]",
+      "kiosk_category": "font-sans font-bold text-lg uppercase tracking-wider",
+      "body": "font-sans text-base leading-relaxed text-[#2A1810]",
+      "caption": "font-sans text-sm text-[#6E584D]"
+    }
+  },
+  "entry_surfaces": {
+    "/": "warm welcoming coffee bar landing — artisanal hero with 'Commander' CTA, quick highlights, and 'Mes commandes' shortcut",
+    "/commander": "McDonalds/BK-style dual-column self-order kiosk — left vertical category rail, center-right dynamic drink grid / empty state / soon-ready screen",
+    "/commandes": "warm receipt-style ledger of scheduled coffee orders with countdown badges and cancellation options"
+  },
+  "product_catalog": {
+    "categories": [
+      {
+        "id": "chaudes",
+        "name": "Boissons chaudes",
+        "description": "Cafés fraîchement moulus et créations réconfortantes",
+        "icon": "Flame",
+        "status": "available"
+      },
+      {
+        "id": "fraiches",
+        "name": "Boissons fraîches",
+        "description": "Breuvages glacés et désaltérants",
+        "icon": "Snowflake",
+        "status": "soon"
+      }
+    ],
+    "hot_drinks": [
+      {
+        "id": "cafe-latte",
+        "name": "Café latte",
+        "tagline": "Douceur lactée & espresso délicat",
+        "image": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/f7xy0nv3_Caf%C3%A9%20latte.png",
+        "description": "Une alliance harmonieuse entre un espresso fraîchement extrait et un lit généreux de lait entier délicatement texturé à la vapeur, surmonté d'une fine couche de micro-mousse onctueuse.",
+        "intensity": "2/5",
+        "serving_temp": "Chaud (65°C)",
+        "allergens": "Lait",
+        "prep_time": "3-5 min",
+        "customizations": ["Lait d'avoine (+0.50€)", "Sans sucre", "Extra shot d'espresso"]
+      },
+      {
+        "id": "cappuccino",
+        "name": "Cappuccino",
+        "tagline": "Mousse aérienne & cacao fin",
+        "image": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/eixmrmi9_Cappuccino.png",
+        "description": "Le grand classique italien composé d'un tiers d'espresso corsé, d'un tiers de lait chaud velouté et d'un tiers de mousse dense et crémeuse, saupoudré d'un nuage de cacao pur.",
+        "intensity": "3/5",
+        "serving_temp": "Chaud (68°C)",
+        "allergens": "Lait",
+        "prep_time": "3-4 min",
+        "customizations": ["Nuage de cannelle", "Double mousse", "Lait d'amande"]
+      },
+      {
+        "id": "espresso",
+        "name": "Espresso",
+        "tagline": "Concentré pur & crema dorée",
+        "image": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/8716v30s_Espresso.png",
+        "description": "Une extraction courte sous haute pression révélant les arômes profonds de fèves de café torréfiées artisanalement, coiffée d'une épaisse crema couleur noisette.",
+        "intensity": "5/5",
+        "serving_temp": "Très chaud (75°C)",
+        "allergens": "Aucun",
+        "prep_time": "2 min",
+        "customizations": ["Ristretto (très court)", "Lungo (allongé)", "Sucre de canne"]
+      },
+      {
+        "id": "viennois-chocolat",
+        "name": "Viennois au chocolat",
+        "tagline": "Chocolat velouté & chantilly maison",
+        "image": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/sc6hbig2_Viennois%20au%20chocolat.png",
+        "description": "Un chocolat chaud riche fondu à l'ancienne avec des fèves de cacao 70%, couronné d'un dôme généreux de crème chantilly vanillée maison et de copeaux de chocolat noir.",
+        "intensity": "Gourmand",
+        "serving_temp": "Chaud (62°C)",
+        "allergens": "Lait",
+        "prep_time": "4-6 min",
+        "customizations": ["Mini-guimauves", "Chantilly végétale", "Sirop de noisette"]
+      },
+      {
+        "id": "cafe-latte-glace",
+        "name": "Café latte glacé",
+        "tagline": "Fraîcheur intense & lait soyeux",
+        "image": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/5wr0zn61_Caf%C3%A9%20latte%20glac%C3%A9.png",
+        "description": "Double espresso versé sur une cascade de glaçons cristallins et de lait frais tempéré. Note : cette création glacée fait partie de notre gamme signature servie à la demande.",
+        "intensity": "3/5",
+        "serving_temp": "Glacé (4°C)",
+        "allergens": "Lait",
+        "prep_time": "3 min",
+        "customizations": ["Sirop de vanille bourbon", "Caramel au beurre salé", "Lait d'avoine"]
+      }
+    ]
+  },
+  "kiosk_ux_specifications": {
+    "structure": {
+      "outer_container": "max-w-6xl mx-auto rounded-3xl bg-[#EFE8DC] border border-[#D8CAB8] shadow-2xl overflow-hidden p-3 md:p-6 my-6 min-h-[720px] flex flex-col",
+      "header_kiosk": "flex items-center justify-between pb-4 border-b border-[#D8CAB8] px-3",
+      "dual_column_layout": "grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 pt-6",
+      "left_rail": "md:col-span-4 lg:col-span-3 flex md:flex-col gap-3",
+      "main_display_area": "md:col-span-8 lg:col-span-9 flex flex-col justify-start"
+    },
+    "category_rail": {
+      "unselected_initial_state": {
+        "text": "Aucune catégorie sélectionnée, veuillez en choisir une",
+        "visual": "Grande illustration avec tasse fumante, icône fléchée animée pointant vers la gauche, invitation chaleureuse"
+      },
+      "category_button_active": "bg-[#2A1810] text-[#FAF6F0] shadow-md transform scale-[1.02] border-transparent font-bold",
+      "category_button_inactive": "bg-[#FFFFFF] text-[#2A1810] hover:bg-[#F3ECE0] hover:text-[#2A1810] border border-[#E0D4C5]"
+    },
+    "drink_card": {
+      "shape": "bg-[#FFFFFF] rounded-2xl p-4 border border-[#E8DED1] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group",
+      "image_container": "relative aspect-square w-full rounded-xl overflow-hidden bg-[#F7F3EE] mb-4 border border-[#EFE8DC]",
+      "info_button": "absolute top-2 right-2 w-8 h-8 rounded-full bg-[#FFFFFF]/90 hover:bg-[#2A1810] hover:text-[#FAF6F0] text-[#8A4B20] border border-[#E0D4C5] flex items-center justify-center shadow-md transition-colors cursor-pointer z-10",
+      "primary_click_action": "Clicking anywhere on the card opens the interactive scheduling agenda modal (date + 30-min slot + booking name)"
+    },
+    "booking_modal": {
+      "header": "Selected drink poster banner + drink title + preparation time",
+      "date_selector": "Interactive calendar component picking available days (today + next 7 days, localized in French)",
+      "time_slots": "Grid of 30-minute intervals (ex: 08:30, 09:00, 09:30, 10:00, ..., 18:00). NO loose exact minutes.",
+      "guest_info": "Prénom du proche (requis), note/message pour le barista (optionnel), choix de lait/sucre rapide",
+      "cta": "Confirmer la dégustation (Génère un ticket de commande avec code et horaire)"
+    },
+    "cold_drinks_screen": {
+      "title": "Bientôt disponible",
+      "subtitle": "Nos baristas préparent actuellement la carte des boissons rafraîchissantes pour la saison estivale.",
+      "visual": "Illustration avec glaçons et limonade / cold brew, badge 'En préparation', bouton pour revenir aux Boissons Chaudes"
+    }
+  },
+  "image_urls": {
+    "hero_background": "https://images.unsplash.com/photo-1542372147193-a7aca54189cd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwY29mZmVlJTIwc2hvcCUyMGludGVyaW9yJTIwYWVzdGhldGljfGVufDB8fHx8MTc4NzAwMTI2Nnww&ixlib=rb-4.1.0&q=85",
+    "coffee_beans_accent": "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxjb3p5JTIwY29mZmVlJTIwYXJ0JTIwd2FybXxlbnwwfHx8fDE3ODcwMDEyNjd8MA&ixlib=rb-4.1.0&q=85",
+    "cafe_interior": "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwyfHxjb3p5JTIwY29mZmVlJTIwc2hvcCUyMGludGVyaW9yJTIwYWVzdGhldGljfGVufDB8fHx8MTc4NzAwMTI2Nnww&ixlib=rb-4.1.0&q=85",
+    "drinks": {
+      "cafe_latte": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/f7xy0nv3_Caf%C3%A9%20latte.png",
+      "cappuccino": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/eixmrmi9_Cappuccino.png",
+      "espresso": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/8716v30s_Espresso.png",
+      "viennois_chocolat": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/sc6hbig2_Viennois%20au%20chocolat.png",
+      "cafe_latte_glace": "https://customer-assets-m6fa6gv7.emergentagent.net/job_690c1dec-8486-4f8b-8982-dcf42ece7bb2/artifacts/5wr0zn61_Caf%C3%A9%20latte%20glac%C3%A9.png"
+    }
+  },
+  "motion": {
+    "hover_transitions": "transition-all duration-200 ease-out",
+    "kiosk_item_scale": "hover:-translate-y-1 hover:shadow-lg transition-transform duration-200",
+    "active_slot_pulse": "transition-colors duration-150 ease-in-out",
+    "stagger_fade_in": "framer-motion entrance with opacity 0 to 1, y 10 to 0",
+    "respect_reduced_motion": "motion-safe:animate-fade"
+  },
+  "accessibility": {
+    "contrast_compliance": "All body copy in deep brown (#2A1810) over beige surfaces (#F7F3EE, #EFE8DC, #FFFFFF) achieves 10.5+:1 to 14:1 contrast ratio exceeding WCAG AAA standard",
+    "touch_targets": "All kiosk interactive targets (category buttons, drink cards, time slots) are minimum 48px height with ample margin",
+    "focus_states": "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A4B20] focus-visible:ring-offset-2",
+    "screen_readers": "Aria labels provided for info icons, time slots, and category selections",
+    "data_testids": {
+      "nav_order_btn": "nav-commander-btn",
+      "nav_my_orders": "nav-my-orders-link",
+      "kiosk_category_hot": "kiosk-category-chaudes-btn",
+      "kiosk_category_cold": "kiosk-category-fraiches-btn",
+      "kiosk_empty_state": "kiosk-empty-category-message",
+      "drink_card_prefix": "drink-card-",
+      "drink_info_btn_prefix": "drink-info-btn-",
+      "drink_modal_agenda": "drink-agenda-dialog",
+      "booking_date_picker": "booking-date-picker",
+      "booking_slot_prefix": "time-slot-",
+      "booking_name_input": "booking-client-name-input",
+      "booking_notes_input": "booking-notes-input",
+      "booking_submit_btn": "booking-submit-confirm-btn",
+      "cold_soon_screen": "cold-drinks-coming-soon-screen",
+      "order_success_card": "order-confirmation-ticket"
+    }
+  },
+  "instructions_to_main_agent": {
+    "key_pages": [
+      {
+        "route": "/",
+        "title": "Accueil Café des Proches",
+        "description": "Page d'accueil chaleureuse avec grand bouton 'Commander', présentation des boissons chaudes du moment, et lien vers 'Mes réservations'."
+      },
+      {
+        "route": "/commander",
+        "title": "Borne de Commande Interactive (Style Borne Fast-Food)",
+        "description": "Interface kiosk plein écran avec rail latéral gauche (Boissons chaudes / Boissons fraîches). État initial : message 'Aucune catégorie sélectionnée, veuillez en choisir une'. Clic 'Boissons chaudes' : affiche la grille des 5 boissons données uniquement. Clic 'Boissons fraîches' : affiche l'écran 'Bientôt disponible'. Chaque carte a son bouton info 'i' (dialogue descriptif) et le clic principal ouvre le sélecteur interactif d'agenda (date + créneau toutes les 30 min)."
+      },
+      {
+        "route": "/commandes",
+        "title": "Mes Commandes & Réservations",
+        "description": "Liste récapitulative des dégustations programmées avec possibilité d'annuler ou de voir le détail de l'heure programmée."
+      }
+    ],
+    "backend_requirements": [
+      "Endpoints FastAPI pour enregistrer une commande de boisson (/api/orders [POST]), lister les commandes (/api/orders [GET]), et annuler une commande (/api/orders/{id} [DELETE]).",
+      "Validation que l'heure choisie est un multiple de 30 minutes (ex: 08:30, 09:00, 14:30).",
+      "Persistance dans MongoDB avec horodatage UTC propre."
+    ],
+    "frontend_components": [
+      "KioskLayout: Shell avec esthétique de borne de commande moderne (cadre beige chaleureux, typographie soignée).",
+      "CategoryRail: Sélecteur vertical tactile avec icônes et indicateur d'état actif.",
+      "DrinkGrid: Grille responsive des 5 boissons chaudes officielles avec images fournies.",
+      "DrinkInfoModal: Modal pop-up de détails rédigés par l'IA (profil aromatique, préparation, température).",
+      "BookingAgendaModal: Sélecteur de date (react-day-picker / Calendar) + grille de boutons pour les tranches horaires par pas de 30 minutes + champ prénom + bouton confirmation.",
+      "ComingSoonCold: Écran d'attente convivial pour les boissons fraîches."
+    ]
+  }
+}
