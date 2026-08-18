@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { apiGet, apiPost } from "@/lib/api";
 import type { Drink, Order, TodayInfo } from "@/lib/types";
 
@@ -271,7 +270,7 @@ export default function Commander() {
 
       {/* Booking agenda dialog */}
       <Dialog open={bookingDrink !== null} onOpenChange={(o) => !o && setBookingDrink(null)}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto" data-testid="drink-agenda-dialog">
+        <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-xl overflow-y-auto" data-testid="drink-agenda-dialog">
           <DialogHeader>
             <DialogTitle className="font-heading text-2xl">
               {bookingDrink?.name} — choisir date & heure
@@ -281,33 +280,34 @@ export default function Commander() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div data-testid="booking-date-picker">
-              <Label className="mb-2 block text-xs uppercase tracking-wide text-muted-foreground">
-                Date
+          <div className="flex flex-col gap-6">
+            <div className="min-w-0" data-testid="booking-date-picker">
+              <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                1. Date
               </Label>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                locale={fr}
-                disabled={{ before: minDate }}
-                className="rounded-xl border border-border bg-card p-2"
-              />
+              <div className="flex justify-center rounded-xl border border-border bg-card p-2">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  locale={fr}
+                  disabled={{ before: minDate }}
+                />
+              </div>
             </div>
 
-            <div>
-              <Label className="mb-2 block text-xs uppercase tracking-wide text-muted-foreground">
-                Heure
+            <div className="min-w-0">
+              <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                2. Heure
               </Label>
-              <div className="grid max-h-56 grid-cols-3 gap-2 overflow-y-auto pr-1">
+              <div className="grid max-h-44 grid-cols-4 gap-2 overflow-y-auto rounded-xl border border-border bg-card p-2 sm:grid-cols-6">
                 {slots.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setSlot(s)}
                     data-testid={`time-slot-${s.replace(":", "")}`}
-                    className={`rounded-lg border px-2 py-2 text-sm transition-colors duration-150 ${
+                    className={`rounded-lg border px-1 py-2 text-sm transition-colors duration-150 ${
                       slot === s
                         ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
                         : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
@@ -317,28 +317,32 @@ export default function Commander() {
                   </button>
                 ))}
               </div>
+            </div>
 
-              <div className="mt-4 space-y-3">
-                <div>
-                  <Label htmlFor="first-name">Prénom</Label>
-                  <Input
-                    id="first-name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Ex. Camille"
-                    data-testid="booking-client-name-input"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="note">Note (optionnel)</Label>
-                  <Textarea
-                    id="note"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Sans sucre, lait d'avoine…"
-                    data-testid="booking-notes-input"
-                  />
-                </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="min-w-0">
+                <Label htmlFor="first-name" className="mb-1.5 block">
+                  Prénom
+                </Label>
+                <Input
+                  id="first-name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Ex. Camille"
+                  data-testid="booking-client-name-input"
+                />
+              </div>
+              <div className="min-w-0">
+                <Label htmlFor="note" className="mb-1.5 block">
+                  Note (optionnel)
+                </Label>
+                <Input
+                  id="note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Sans sucre, lait d'avoine…"
+                  data-testid="booking-notes-input"
+                />
               </div>
             </div>
           </div>

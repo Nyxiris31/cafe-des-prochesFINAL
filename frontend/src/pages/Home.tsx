@@ -59,12 +59,10 @@ export default function Home() {
         <section className="relative" data-testid="home-drink-preview">
           <div className="absolute -left-6 -top-6 hidden h-24 w-24 rounded-full bg-[#e8ddd0] md:block" />
           <div className="relative grid grid-cols-2 gap-4">
-            {(drinks ?? []).slice(0, 4).map((d, i) => (
+            {(drinks ?? []).slice(0, 4).map((d) => (
               <div
                 key={d.id}
-                className={`overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-transform duration-300 hover:-translate-y-1 ${
-                  i % 2 === 1 ? "md:translate-y-8" : ""
-                }`}
+                className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-transform duration-300 hover:-translate-y-1"
                 data-testid={`home-preview-${d.id}`}
               >
                 <img
