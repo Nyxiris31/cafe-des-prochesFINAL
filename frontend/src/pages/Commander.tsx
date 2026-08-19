@@ -199,19 +199,31 @@ export default function Commander() {
                   {(hotDrinks ?? []).map((d) => (
                     <div
                       key={d.id}
-                      className="group flex flex-col rounded-2xl border border-[#e8ded1] bg-white p-3 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openBooking(d)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openBooking(d);
+                        }
+                      }}
+                      data-testid={`drink-card-${d.id}`}
+                      className="group flex cursor-pointer flex-col rounded-2xl border border-[#e8ded1] bg-white p-3 text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a4b20]"
                     >
                       <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl border border-[#efe8dc] bg-[#f7f3ee]">
                         <img
                           src={d.image}
                           alt={d.name}
-                          loading="lazy"
                           className="h-full w-full object-cover"
                         />
                         <button
                           type="button"
                           aria-label={`Infos sur ${d.name}`}
-                          onClick={() => setInfoDrink(d)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInfoDrink(d);
+                          }}
                           data-testid={`drink-info-btn-${d.id}`}
                           className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#e0d4c5] bg-white/90 text-[#8a4b20] shadow-md transition-colors duration-200 hover:bg-[#2a1810] hover:text-[#faf6f0]"
                         >
@@ -220,13 +232,9 @@ export default function Commander() {
                       </div>
                       <p className="text-base font-semibold">{d.name}</p>
                       <p className="mb-3 text-xs text-muted-foreground">{d.tagline}</p>
-                      <Button
-                        className="mt-auto w-full"
-                        onClick={() => openBooking(d)}
-                        data-testid={`drink-card-${d.id}`}
-                      >
+                      <span className="mt-auto inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#2a1810] text-sm font-semibold text-[#faf6f0] transition-colors duration-200 group-hover:bg-[#8a4b20]">
                         Choisir un créneau
-                      </Button>
+                      </span>
                     </div>
                   ))}
                   {!hotDrinks && !hotError && (
@@ -270,85 +278,105 @@ export default function Commander() {
 
       {/* Booking agenda dialog */}
       <Dialog open={bookingDrink !== null} onOpenChange={(o) => !o && setBookingDrink(null)}>
-        <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-xl overflow-y-auto" data-testid="drink-agenda-dialog">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-2xl">
+        <DialogContent
+          className="flex flex-col gap-0 overflow-y-auto rounded-none border-0 p-6 sm:p-10"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100vw",
+            maxWidth: "100vw",
+            height: "100dvh",
+            translate: "none",
+            transform: "none",
+          }}
+          data-testid="drink-agenda-dialog"
+        >
+          <DialogHeader className="mx-auto w-full max-w-4xl text-left">
+            <DialogTitle className="font-heading text-3xl tracking-tight md:text-4xl">
               {bookingDrink?.name} — choisir date & heure
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base">
               Créneaux toutes les 30 minutes, de 08h00 à 20h00.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-6">
+          <div className="mx-auto mt-6 grid w-full max-w-4xl gap-8 lg:grid-cols-2">
             <div className="min-w-0" data-testid="booking-date-picker">
               <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 1. Date
               </Label>
-              <div className="flex justify-center rounded-xl border border-border bg-card p-2">
+              <div className="flex justify-center rounded-2xl border border-border bg-card p-3">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={setDate}
                   locale={fr}
+                  captionLayout="dropdown"
+                  startMonth={minDate}
+                  endMonth={new Date(minDate.getFullYear() + 1, 11)}
                   disabled={{ before: minDate }}
+                  className="w-full [--cell-size:2.6rem]"
                 />
               </div>
             </div>
 
-            <div className="min-w-0">
-              <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                2. Heure
-              </Label>
-              <div className="grid max-h-44 grid-cols-4 gap-2 overflow-y-auto rounded-xl border border-border bg-card p-2 sm:grid-cols-6">
-                {slots.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSlot(s)}
-                    data-testid={`time-slot-${s.replace(":", "")}`}
-                    className={`rounded-lg border px-1 py-2 text-sm transition-colors duration-150 ${
-                      slot === s
-                        ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
-                        : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
-                    }`}
-                  >
-                    {s.replace(":", "h")}
-                  </button>
-                ))}
+            <div className="flex min-w-0 flex-col gap-6">
+              <div className="min-w-0">
+                <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  2. Heure
+                </Label>
+                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-3 sm:grid-cols-4 lg:grid-cols-5">
+                  {slots.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSlot(s)}
+                      data-testid={`time-slot-${s.replace(":", "")}`}
+                      className={`min-w-0 whitespace-nowrap rounded-lg border px-2 py-3 text-center text-sm font-medium transition-colors duration-150 ${
+                        slot === s
+                          ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
+                          : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
+                      }`}
+                    >
+                      {s.replace(":", "h")}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="min-w-0">
-                <Label htmlFor="first-name" className="mb-1.5 block">
-                  Prénom
-                </Label>
-                <Input
-                  id="first-name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Ex. Camille"
-                  data-testid="booking-client-name-input"
-                />
-              </div>
-              <div className="min-w-0">
-                <Label htmlFor="note" className="mb-1.5 block">
-                  Note (optionnel)
-                </Label>
-                <Input
-                  id="note"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Sans sucre, lait d'avoine…"
-                  data-testid="booking-notes-input"
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="min-w-0">
+                  <Label htmlFor="first-name" className="mb-1.5 block">
+                    Prénom
+                  </Label>
+                  <Input
+                    id="first-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Ex. Camille"
+                    data-testid="booking-client-name-input"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Label htmlFor="note" className="mb-1.5 block">
+                    Note (optionnel)
+                  </Label>
+                  <Input
+                    id="note"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Sans sucre, lait d'avoine…"
+                    data-testid="booking-notes-input"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mx-auto mt-8 w-full max-w-4xl">
             <Button
+              size="lg"
+              className="h-14 w-full text-base sm:w-auto sm:px-10"
               disabled={!canSubmit || createOrder.isPending}
               onClick={() => bookingDrink && createOrder.mutate(bookingDrink)}
               data-testid="booking-submit-confirm-btn"

@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Coffee, ArrowRight, CalendarClock, Sparkles } from "lucide-react";
+import { Coffee, ArrowRight, CalendarClock, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { apiGet } from "@/lib/api";
 import type { Drink } from "@/lib/types";
@@ -10,6 +11,18 @@ export default function Home() {
     queryKey: ["drinks", "chaudes"],
     queryFn: () => apiGet<Drink[]>("/drinks?category=chaudes"),
   });
+
+  const list = drinks ?? [];
+  const [index, setIndex] = useState(0);
+
+  // Auto-advance the showcase; pauses whenever the list is empty.
+  useEffect(() => {
+    if (list.length < 2) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % list.length), 4500);
+    return () => clearInterval(t);
+  }, [list.length]);
+
+  const current = list[Math.min(index, Math.max(list.length - 1, 0))];
 
   return (
     <div className="min-h-screen bg-background" data-testid="home-page">
@@ -37,8 +50,8 @@ export default function Home() {
             <span className="block text-[#8a4b20]">on s'occupe du reste.</span>
           </h1>
           <p className="mt-5 max-w-md text-lg text-muted-foreground">
-            Choisissez une boisson chaude, réservez un créneau — toutes les 30 minutes — et
-            retrouvez-la prête à l'heure dite.
+            Choisissez une boisson, réservez un créneau — toutes les 30 minutes — et retrouvez-la
+            prête à l'heure dite.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -56,26 +69,65 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="relative" data-testid="home-drink-preview">
-          <div className="absolute -left-6 -top-6 hidden h-24 w-24 rounded-full bg-[#e8ddd0] md:block" />
-          <div className="relative grid grid-cols-2 gap-4">
-            {(drinks ?? []).slice(0, 4).map((d) => (
-              <div
-                key={d.id}
-                className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-transform duration-300 hover:-translate-y-1"
-                data-testid={`home-preview-${d.id}`}
-              >
-                <img
-                  src={d.image}
-                  alt={d.name}
-                  loading="lazy"
-                  className="aspect-square w-full object-cover"
-                />
-                <p className="px-3 py-2.5 text-sm font-medium">{d.name}</p>
-              </div>
-            ))}
-            {!drinks && (
-              <div className="col-span-2 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+        <section className="relative" data-testid="home-drink-carousel">
+          <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+            {current ? (
+              <>
+                <div className="relative aspect-square w-full overflow-hidden bg-[#f7f3ee]">
+                  <img
+                    key={current.id}
+                    src={current.image}
+                    alt={current.name}
+                    className="h-full w-full object-cover"
+                    data-testid="carousel-image"
+                  />
+                  <button
+                    type="button"
+                    aria-label="Boisson précédente"
+                    onClick={() => setIndex((i) => (i - 1 + list.length) % list.length)}
+                    data-testid="carousel-prev-btn"
+                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#e0d4c5] bg-white/90 text-[#2a1810] shadow-md transition-colors duration-200 hover:bg-white"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Boisson suivante"
+                    onClick={() => setIndex((i) => (i + 1) % list.length)}
+                    data-testid="carousel-next-btn"
+                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#e0d4c5] bg-white/90 text-[#2a1810] shadow-md transition-colors duration-200 hover:bg-white"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="px-6 py-5">
+                  <p className="font-heading text-2xl tracking-tight" data-testid="carousel-name">
+                    {current.name}
+                  </p>
+                  <p
+                    className="mt-2 min-h-[3.5rem] text-sm leading-relaxed text-muted-foreground"
+                    data-testid="carousel-description"
+                  >
+                    {current.description}
+                  </p>
+                  <div className="mt-4 flex gap-1.5">
+                    {list.map((d, i) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        aria-label={`Voir ${d.name}`}
+                        onClick={() => setIndex(i)}
+                        data-testid={`carousel-dot-${d.id}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i === index ? "w-7 bg-[#8a4b20]" : "w-3 bg-[#d8cab8]"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-16 text-center text-sm text-muted-foreground">
                 Notre carte s'affiche ici.
               </div>
             )}

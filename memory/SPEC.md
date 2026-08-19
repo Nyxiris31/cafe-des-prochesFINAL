@@ -5,14 +5,15 @@ Kiosk-style ordering app (French UI) so family can "order" a hot drink and book 
 ## Routes
 - `/` Home — hero + "Commander" CTA + link "Mes commandes".
 - `/commander` Kiosk: left category rail (Boissons chaudes / Boissons fraîches). Initial state shows
-  "Aucune catégorie sélectionnée, veuillez en choisir une". Hot → grid of 4 drinks (image, name, "i"
-  info dialog, "Choisir un créneau" → agenda dialog with calendar + 30-min slots + prénom + note).
-  Cold → "Bientôt disponible" screen.
+  "Aucune catégorie sélectionnée, veuillez en choisir une". Hot → grid of 6 drinks; the whole card is
+  clickable (opens the fullscreen agenda dialog: calendar with month/year dropdowns + 30-min slots +
+  prénom + note); the small "i" opens the info dialog. Cold → "Bientôt disponible" screen.
+- `/` Home carousel auto-advances through hot drinks, showing image + name + description only.
 - `/commandes` list of reservations with cancel.
 
 ## Data
 Catalog is hardcoded in `backend/routers/orders.py` (no seed data, no auth).
-- chaudes: cafe-latte, cappuccino, espresso, viennois-chocolat
+- chaudes: cafe-latte, cappuccino, espresso, viennois-chocolat, cafe-allonge, chocolat-chaud
 - fraiches: cafe-latte-glace (not orderable — category shows "Bientôt disponible")
 
 `Drink` info dialog is intentionally simple: description courte + `composition` (liste d'ingrédients) +
