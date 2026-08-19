@@ -1,0 +1,17 @@
+{
+  "name": "Le Café des Proches",
+  "short_name": "Café Proches",
+  "description": "Commandez une boisson chaude et réservez un créneau de 30 minutes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ee",
+  "theme_color": "#2a1810",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

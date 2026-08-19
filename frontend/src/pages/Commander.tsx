@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Coffee, Flame, Info, Snowflake, MoveLeft, Check } from "lucide-react";
+import { ArrowLeft, Coffee, Flame, Info, Snowflake, MoveLeft, Check, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiGet, apiPost } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import type { Drink, Order, TodayInfo } from "@/lib/types";
 
 const CATEGORIES = [
@@ -36,6 +37,7 @@ function toIsoDate(d: Date): string {
 
 export default function Commander() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [category, setCategory] = useState<CategoryId | null>(null);
   const [infoDrink, setInfoDrink] = useState<Drink | null>(null);
   const [bookingDrink, setBookingDrink] = useState<Drink | null>(null);
@@ -77,42 +79,60 @@ export default function Commander() {
   });
 
   function openBooking(drink: Drink) {
+    if (!drink.available) {
+      toast.error(`${drink.name} est momentanément indisponible.`);
+      return;
+    }
     setBookingDrink(drink);
     setDate(meta ? parseISO(meta.today) : new Date());
     setSlot(null);
-    setFirstName("");
+    setFirstName(user?.name?.split(" ")[0] ?? "");
     setNote("");
   }
 
   const canSubmit = Boolean(date && slot && firstName.trim().length > 0);
 
   return (
-    <div className="min-h-screen bg-background px-3 py-5 md:px-8" data-testid="commander-page">
-      <div className="mx-auto flex min-h-[720px] max-w-6xl flex-col overflow-hidden rounded-3xl border border-[#d8cab8] bg-[#efe8dc] p-3 shadow-xl md:p-6">
-        <header className="flex items-center justify-between border-b border-[#d8cab8] px-2 pb-4">
+    <div className="min-h-screen bg-background px-2 py-3 sm:px-4 sm:py-5 md:px-8" data-testid="commander-page">
+      <div className="mx-auto flex min-h-[calc(100dvh-1.5rem)] max-w-6xl flex-col overflow-hidden rounded-3xl border border-[#d8cab8] bg-[#efe8dc] p-3 shadow-xl md:p-6">
+        <header className="flex items-center justify-between gap-2 border-b border-[#d8cab8] pb-4">
           <Link
             to="/"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors duration-200 hover:bg-[#f3ece0]"
             data-testid="kiosk-back-home-link"
           >
-            <ArrowLeft className="mr-1.5 h-4 w-4" /> Accueil
+            <ArrowLeft className="h-4 w-4" /> Accueil
           </Link>
           <div className="flex items-center gap-2">
             <Coffee className="h-5 w-5 text-[#8a4b20]" />
-            <span className="font-heading text-lg tracking-tight">Borne de commande</span>
+            <span className="hidden font-heading text-lg tracking-tight sm:inline">
+              Borne de commande
+            </span>
           </div>
-          <Link
-            to="/commandes"
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
-            data-testid="kiosk-my-orders-link"
-          >
-            Mes commandes
-          </Link>
+          <div className="flex items-center gap-1">
+            {user?.is_admin && (
+              <Link
+                to="/admin"
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#2a1810] px-3 text-xs font-semibold text-[#faf6f0] transition-colors duration-200 hover:bg-[#8a4b20]"
+                data-testid="kiosk-admin-link"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" /> Admin
+              </Link>
+            )}
+            <Link
+              to="/commandes"
+              className="inline-flex h-10 items-center rounded-full px-3 text-sm font-medium transition-colors duration-200 hover:bg-[#f3ece0]"
+              data-testid="kiosk-my-orders-link"
+            >
+              Commandes
+            </Link>
+          </div>
         </header>
 
-        <div className="grid flex-1 grid-cols-1 gap-6 pt-6 md:grid-cols-12">
-          <aside className="flex gap-3 md:col-span-4 md:flex-col lg:col-span-3">
-            <p className="hidden px-1 text-xs font-bold uppercase tracking-widest text-muted-foreground md:block">
+        {/* Same two-column kiosk layout on phone and desktop */}
+        <div className="grid flex-1 grid-cols-12 gap-3 pt-5 md:gap-6">
+          <aside className="col-span-4 flex flex-col gap-2 md:col-span-4 lg:col-span-3">
+            <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground md:text-xs">
               Catégories
             </p>
             {CATEGORIES.map((c) => {
@@ -123,22 +143,24 @@ export default function Commander() {
                   type="button"
                   onClick={() => setCategory(c.id)}
                   data-testid={`kiosk-category-${c.id}-btn`}
-                  className={`flex w-full flex-col items-start gap-1 rounded-2xl border px-4 py-4 text-left transition-colors duration-200 min-h-[64px] ${
+                  className={`flex w-full flex-col items-start gap-1 rounded-2xl border px-2.5 py-3 text-left transition-colors duration-200 md:px-4 md:py-4 ${
                     active
                       ? "border-transparent bg-[#2a1810] text-[#faf6f0] shadow-md"
                       : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
                   }`}
                 >
-                  <span className="flex items-center gap-2 text-base font-bold uppercase tracking-wide">
+                  <span className="flex items-start gap-1.5 text-xs font-bold uppercase leading-tight tracking-wide md:text-base">
                     {c.id === "chaudes" ? (
-                      <Flame className="h-4 w-4" />
+                      <Flame className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4" />
                     ) : (
-                      <Snowflake className="h-4 w-4" />
+                      <Snowflake className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4" />
                     )}
                     {c.label}
                   </span>
                   <span
-                    className={`text-xs ${active ? "text-[#d8cab8]" : "text-muted-foreground"}`}
+                    className={`text-[10px] leading-tight md:text-xs ${
+                      active ? "text-[#d8cab8]" : "text-muted-foreground"
+                    }`}
                   >
                     {c.hint}
                   </span>
@@ -147,34 +169,36 @@ export default function Commander() {
             })}
           </aside>
 
-          <main className="md:col-span-8 lg:col-span-9">
+          <main className="col-span-8 md:col-span-8 lg:col-span-9">
             {category === null && (
               <div
-                className="flex h-full flex-col items-center justify-center gap-5 rounded-2xl border border-dashed border-[#d8cab8] bg-[#f7f3ee] p-10 text-center"
+                className="flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[#d8cab8] bg-[#f7f3ee] p-5 text-center md:p-10"
                 data-testid="kiosk-empty-category-message"
               >
                 <div className="relative">
                   <span className="absolute -top-6 left-1/2 h-6 w-1.5 -translate-x-1/2 rounded-full bg-[#d8cab8] animate-steam" />
-                  <Coffee className="h-14 w-14 text-[#8a4b20]" />
+                  <Coffee className="h-10 w-10 text-[#8a4b20] md:h-14 md:w-14" />
                 </div>
-                <h2 className="max-w-sm font-heading text-2xl tracking-tight">
+                <h2 className="max-w-sm font-heading text-lg leading-snug tracking-tight md:text-2xl">
                   Aucune catégorie sélectionnée, veuillez en choisir une
                 </h2>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                  <MoveLeft className="h-4 w-4 animate-nudge-left" /> Choisissez une catégorie sur
-                  la gauche
+                <p className="inline-flex items-center gap-2 text-xs text-muted-foreground md:text-sm">
+                  <MoveLeft className="h-4 w-4 animate-nudge-left" /> Choisissez une catégorie sur la
+                  gauche
                 </p>
               </div>
             )}
 
             {category === "fraiches" && (
               <div
-                className="flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-[#d8cab8] bg-white p-10 text-center"
+                className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-[#d8cab8] bg-white p-5 text-center md:gap-4 md:p-10"
                 data-testid="cold-drinks-coming-soon-screen"
               >
-                <Snowflake className="h-14 w-14 text-[#8a4b20]" />
-                <h2 className="font-heading text-3xl tracking-tight">Bientôt disponible</h2>
-                <p className="max-w-md text-muted-foreground">
+                <Snowflake className="h-10 w-10 text-[#8a4b20] md:h-14 md:w-14" />
+                <h2 className="font-heading text-2xl tracking-tight md:text-3xl">
+                  Bientôt disponible
+                </h2>
+                <p className="max-w-md text-sm text-muted-foreground md:text-base">
                   La carte des boissons fraîches est en préparation. Revenez très vite !
                 </p>
                 <Button
@@ -189,18 +213,21 @@ export default function Commander() {
 
             {category === "chaudes" && (
               <div>
-                <h2 className="mb-4 font-heading text-2xl tracking-tight">Boissons chaudes</h2>
+                <h2 className="mb-3 font-heading text-xl tracking-tight md:mb-4 md:text-2xl">
+                  Boissons chaudes
+                </h2>
                 {hotError && (
                   <p className="mb-4 text-sm text-destructive" data-testid="drinks-error-message">
                     Carte momentanément indisponible.
                   </p>
                 )}
-                <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2.5 md:gap-4 lg:grid-cols-3">
                   {(hotDrinks ?? []).map((d) => (
                     <div
                       key={d.id}
                       role="button"
                       tabIndex={0}
+                      aria-disabled={!d.available}
                       onClick={() => openBooking(d)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -209,14 +236,22 @@ export default function Commander() {
                         }
                       }}
                       data-testid={`drink-card-${d.id}`}
-                      className="group flex cursor-pointer flex-col rounded-2xl border border-[#e8ded1] bg-white p-3 text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a4b20]"
+                      className={`group flex flex-col rounded-2xl border border-[#e8ded1] bg-white p-2 text-left shadow-sm transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a4b20] md:p-3 ${
+                        d.available
+                          ? "cursor-pointer hover:-translate-y-1 hover:shadow-xl"
+                          : "cursor-not-allowed opacity-60"
+                      }`}
                     >
-                      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl border border-[#efe8dc] bg-[#f7f3ee]">
-                        <img
-                          src={d.image}
-                          alt={d.name}
-                          className="h-full w-full object-cover"
-                        />
+                      <div className="relative mb-2 aspect-square w-full overflow-hidden rounded-xl border border-[#efe8dc] bg-[#f7f3ee] md:mb-3">
+                        <img src={d.image} alt={d.name} className="h-full w-full object-cover" />
+                        {!d.available && (
+                          <span
+                            className="absolute inset-x-0 bottom-0 bg-[#2a1810]/85 py-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-[#faf6f0] md:text-xs"
+                            data-testid={`drink-unavailable-badge-${d.id}`}
+                          >
+                            Non disponible
+                          </span>
+                        )}
                         <button
                           type="button"
                           aria-label={`Infos sur ${d.name}`}
@@ -225,15 +260,30 @@ export default function Commander() {
                             setInfoDrink(d);
                           }}
                           data-testid={`drink-info-btn-${d.id}`}
-                          className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-[#e0d4c5] bg-white/90 text-[#8a4b20] shadow-md transition-colors duration-200 hover:bg-[#2a1810] hover:text-[#faf6f0]"
+                          className="absolute right-1.5 top-1.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-[#e0d4c5] bg-white/90 text-[#8a4b20] shadow-md transition-colors duration-200 hover:bg-[#2a1810] hover:text-[#faf6f0] md:right-2 md:top-2 md:h-9 md:w-9"
                         >
                           <Info className="h-4 w-4" />
                         </button>
                       </div>
-                      <p className="text-base font-semibold">{d.name}</p>
-                      <p className="mb-3 text-xs text-muted-foreground">{d.tagline}</p>
-                      <span className="mt-auto inline-flex h-10 w-full items-center justify-center rounded-lg bg-[#2a1810] text-sm font-semibold text-[#faf6f0] transition-colors duration-200 group-hover:bg-[#8a4b20]">
-                        Choisir un créneau
+                      <p className="text-sm font-semibold leading-tight md:text-base">{d.name}</p>
+                      <p className="mb-2 text-[11px] leading-tight text-muted-foreground md:mb-3 md:text-xs">
+                        {d.tagline}
+                      </p>
+                      <span
+                        className={`mt-auto inline-flex h-9 w-full items-center justify-center rounded-lg text-xs font-semibold transition-colors duration-200 md:h-10 md:text-sm ${
+                          d.available
+                            ? "bg-[#2a1810] text-[#faf6f0] group-hover:bg-[#8a4b20]"
+                            : "bg-[#d8cab8] text-[#6e584d]"
+                        }`}
+                      >
+                        {d.available ? (
+                          <>
+                            <span className="sm:hidden">Réserver</span>
+                            <span className="hidden sm:inline">Choisir un créneau</span>
+                          </>
+                        ) : (
+                          "Indisponible"
+                        )}
                       </span>
                     </div>
                   ))}
@@ -276,10 +326,10 @@ export default function Commander() {
         </DialogContent>
       </Dialog>
 
-      {/* Booking agenda dialog */}
+      {/* Booking agenda dialog — full screen on every device */}
       <Dialog open={bookingDrink !== null} onOpenChange={(o) => !o && setBookingDrink(null)}>
         <DialogContent
-          className="flex flex-col gap-0 overflow-y-auto rounded-none border-0 p-6 sm:p-10"
+          className="flex flex-col gap-0 overflow-y-auto rounded-none border-0 p-4 sm:p-8 md:p-10"
           style={{
             top: 0,
             left: 0,
@@ -292,20 +342,20 @@ export default function Commander() {
           data-testid="drink-agenda-dialog"
         >
           <DialogHeader className="mx-auto w-full max-w-4xl text-left">
-            <DialogTitle className="font-heading text-3xl tracking-tight md:text-4xl">
+            <DialogTitle className="font-heading text-2xl tracking-tight md:text-4xl">
               {bookingDrink?.name} — choisir date & heure
             </DialogTitle>
-            <DialogDescription className="text-base">
+            <DialogDescription className="text-sm md:text-base">
               Créneaux toutes les 30 minutes, de 08h00 à 20h00.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mx-auto mt-6 grid w-full max-w-4xl gap-8 lg:grid-cols-2">
+          <div className="mx-auto mt-5 grid w-full max-w-4xl gap-6 lg:grid-cols-2 lg:gap-8">
             <div className="min-w-0" data-testid="booking-date-picker">
               <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 1. Date
               </Label>
-              <div className="flex justify-center rounded-2xl border border-border bg-card p-3">
+              <div className="flex justify-center rounded-2xl border border-border bg-card p-2 md:p-3">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -315,24 +365,24 @@ export default function Commander() {
                   startMonth={minDate}
                   endMonth={new Date(minDate.getFullYear() + 1, 11)}
                   disabled={{ before: minDate }}
-                  className="w-full [--cell-size:2.6rem]"
+                  className="w-full [--cell-size:2.3rem] md:[--cell-size:2.6rem]"
                 />
               </div>
             </div>
 
-            <div className="flex min-w-0 flex-col gap-6">
+            <div className="flex min-w-0 flex-col gap-5">
               <div className="min-w-0">
                 <Label className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                   2. Heure
                 </Label>
-                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-3 sm:grid-cols-4 lg:grid-cols-5">
+                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-4 md:p-3 lg:grid-cols-5">
                   {slots.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => setSlot(s)}
                       data-testid={`time-slot-${s.replace(":", "")}`}
-                      className={`min-w-0 whitespace-nowrap rounded-lg border px-2 py-3 text-center text-sm font-medium transition-colors duration-150 ${
+                      className={`min-w-0 whitespace-nowrap rounded-lg border px-1 py-2.5 text-center text-xs font-medium transition-colors duration-150 md:px-2 md:py-3 md:text-sm ${
                         slot === s
                           ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
                           : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
@@ -373,7 +423,7 @@ export default function Commander() {
             </div>
           </div>
 
-          <DialogFooter className="mx-auto mt-8 w-full max-w-4xl">
+          <DialogFooter className="mx-auto mt-6 w-full max-w-4xl">
             <Button
               size="lg"
               className="h-14 w-full text-base sm:w-auto sm:px-10"

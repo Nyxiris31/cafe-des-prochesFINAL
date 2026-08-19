@@ -7,10 +7,12 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { apiDelete, apiGet } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import type { Order } from "@/lib/types";
 
 export default function Commandes() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { data: orders, isLoading, isError } = useQuery({
     queryKey: ["orders"],
     queryFn: () => apiGet<Order[]>("/orders"),
@@ -41,13 +43,24 @@ export default function Commandes() {
           <span className="hidden items-center gap-2 font-heading text-lg tracking-tight sm:flex">
             <Coffee className="h-5 w-5 text-[#8a4b20]" /> Le Café des Proches
           </span>
-          <Link
-            to="/commander"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[#2a1810] px-5 text-sm font-semibold text-[#faf6f0] transition-colors duration-200 hover:bg-[#8a4b20]"
-            data-testid="orders-new-order-btn"
-          >
-            Commander
-          </Link>
+          <div className="flex items-center gap-2">
+            {user?.is_admin && (
+              <Link
+                to="/admin"
+                className="inline-flex h-11 items-center gap-1.5 rounded-full bg-secondary px-4 text-sm font-semibold transition-colors duration-200 hover:bg-[#e3d8c8]"
+                data-testid="orders-admin-link"
+              >
+                Admin
+              </Link>
+            )}
+            <Link
+              to="/commander"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#2a1810] px-5 text-sm font-semibold text-[#faf6f0] transition-colors duration-200 hover:bg-[#8a4b20]"
+              data-testid="orders-new-order-btn"
+            >
+              Commander
+            </Link>
+          </div>
         </div>
       </header>
 

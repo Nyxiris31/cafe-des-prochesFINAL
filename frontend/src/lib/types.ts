@@ -1,4 +1,4 @@
-// Hand-written mirrors of the Pydantic models in backend/routers/orders.py.
+// Hand-written mirrors of the Pydantic models in backend/routers/*.py.
 export interface Drink {
   id: string;
   name: string;
@@ -8,6 +8,7 @@ export interface Drink {
   description: string;
   composition: string[];
   allergens: string;
+  available: boolean;
 }
 
 export interface Order {
@@ -19,6 +20,8 @@ export interface Order {
   time: string;
   first_name: string;
   note: string | null;
+  user_id: string;
+  user_email: string;
   created_at: string;
 }
 
@@ -33,4 +36,16 @@ export interface OrderCreate {
 export interface TodayInfo {
   today: string;
   slots: string[];
+}
+
+export interface User {
+  user_id: string;
+  email: string;
+  name: string;
+  picture: string | null;
+  is_admin: boolean;
+}
+
+export interface PushKey {
+  public_key: string;
 }

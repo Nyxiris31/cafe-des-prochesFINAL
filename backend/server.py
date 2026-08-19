@@ -59,7 +59,9 @@ async def get_status_checks():
     return [StatusCheck(**status_check) for status_check in status_checks]
 
 from routers.orders import router as orders_router
+from routers.auth import router as auth_router
 
+api_router.include_router(auth_router)
 api_router.include_router(orders_router)
 
 # Include the router in the main app
