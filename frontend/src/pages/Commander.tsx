@@ -24,7 +24,7 @@ import type { Drink, Order, TodayInfo } from "@/lib/types";
 
 const CATEGORIES = [
   { id: "chaudes", label: "Boissons chaudes", hint: "Cafés & chocolats réconfortants" },
-  { id: "fraiches", label: "Boissons fraîches", hint: "Bientôt disponible" },
+  { id: "fraiches", label: "Boissons fraîches", hint: "Thés glacés & cafés frappés" },
 ] as const;
 
 type CategoryId = (typeof CATEGORIES)[number]["id"];
@@ -56,9 +56,19 @@ export default function Commander() {
     queryFn: () => apiGet<Drink[]>("/drinks?category=chaudes"),
     enabled: category === "chaudes",
   });
+  const { data: coldDrinks } = useQuery({
+    queryKey: ["drinks", "fraiches"],
+    queryFn: () => apiGet<Drink[]>("/drinks?category=fraiches"),
+    enabled: category === "fraiches",
+  });
 
   const slots = meta?.slots ?? [];
   const minDate = meta ? parseISO(meta.today) : new Date();
+  const isToday = Boolean(meta && date && toIsoDate(date) === meta.today);
+  // A slot already gone today can't be ordered — the server rejects it too.
+  const isPastSlot = (s: string) => isToday && Boolean(meta) && s <= meta!.now;
+  const shownDrinks = category === "chaudes" ? hotDrinks : coldDrinks;
+  const coldAvailable = (coldDrinks ?? []).filter((d) => d.available);
 
   const createOrder = useMutation({
     mutationFn: (drink: Drink) =>
@@ -90,7 +100,9 @@ export default function Commander() {
     setNote("");
   }
 
-  const canSubmit = Boolean(date && slot && firstName.trim().length > 0);
+  const canSubmit = Boolean(
+    date && slot && !isPastSlot(slot) && firstName.trim().length > 0,
+  );
 
   return (
     <div className="min-h-screen bg-background px-2 py-3 sm:px-4 sm:py-5 md:px-8" data-testid="commander-page">
@@ -189,7 +201,7 @@ export default function Commander() {
               </div>
             )}
 
-            {category === "fraiches" && (
+            {category === "fraiches" && coldAvailable.length === 0 && (
               <div
                 className="flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-[#d8cab8] bg-white p-5 text-center md:gap-4 md:p-10"
                 data-testid="cold-drinks-coming-soon-screen"
@@ -211,10 +223,10 @@ export default function Commander() {
               </div>
             )}
 
-            {category === "chaudes" && (
+            {category !== null && !(category === "fraiches" && coldAvailable.length === 0) && (
               <div>
                 <h2 className="mb-3 font-heading text-xl tracking-tight md:mb-4 md:text-2xl">
-                  Boissons chaudes
+                  {category === "chaudes" ? "Boissons chaudes" : "Boissons fraîches"}
                 </h2>
                 {hotError && (
                   <p className="mb-4 text-sm text-destructive" data-testid="drinks-error-message">
@@ -222,7 +234,7 @@ export default function Commander() {
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-2.5 md:gap-4 lg:grid-cols-3">
-                  {(hotDrinks ?? []).map((d) => (
+                  {(shownDrinks ?? []).map((d) => (
                     <div
                       key={d.id}
                       role="button"
@@ -287,7 +299,7 @@ export default function Commander() {
                       </span>
                     </div>
                   ))}
-                  {!hotDrinks && !hotError && (
+                  {!shownDrinks && !hotError && (
                     <p className="col-span-full text-sm text-muted-foreground">Chargement…</p>
                   )}
                 </div>
@@ -299,28 +311,40 @@ export default function Commander() {
 
       {/* Info dialog */}
       <Dialog open={infoDrink !== null} onOpenChange={(o) => !o && setInfoDrink(null)}>
-        <DialogContent className="max-w-lg" data-testid="drink-info-dialog">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto" data-testid="drink-info-dialog">
           <DialogHeader>
             <DialogTitle className="font-heading text-2xl">{infoDrink?.name}</DialogTitle>
             <DialogDescription>{infoDrink?.tagline}</DialogDescription>
           </DialogHeader>
-          <p className="text-sm leading-relaxed" data-testid="drink-info-description">
+          {infoDrink && (
+            <img
+              src={infoDrink.image}
+              alt={infoDrink.name}
+              className="aspect-square w-full rounded-2xl border border-border object-cover"
+              data-testid="drink-info-large-image"
+            />
+          )}
+          <p className="mt-1 text-sm leading-relaxed" data-testid="drink-info-description">
             {infoDrink?.description}
           </p>
           <div className="mt-4 rounded-xl border border-border bg-card p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Composition
-            </p>
-            <ul className="mt-2 space-y-1 text-sm" data-testid="drink-info-composition">
-              {(infoDrink?.composition ?? []).map((c) => (
-                <li key={c} className="flex items-start gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a4b20]" />
-                  {c}
-                </li>
-              ))}
-            </ul>
+            {(infoDrink?.composition ?? []).length > 0 && (
+              <>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  Composition
+                </p>
+                <ul className="mt-2 space-y-1 text-sm" data-testid="drink-info-composition">
+                  {(infoDrink?.composition ?? []).map((c) => (
+                    <li key={c} className="flex items-start gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#8a4b20]" />
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <p className="mt-4 text-xs text-muted-foreground" data-testid="drink-info-allergens">
-              Allergènes : {infoDrink?.allergens}
+              Allergènes : {infoDrink?.allergens || "non précisés"}
             </p>
           </div>
         </DialogContent>
@@ -376,22 +400,33 @@ export default function Commander() {
                   2. Heure
                 </Label>
                 <div className="grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-2 sm:grid-cols-4 md:p-3 lg:grid-cols-5">
-                  {slots.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setSlot(s)}
-                      data-testid={`time-slot-${s.replace(":", "")}`}
-                      className={`min-w-0 whitespace-nowrap rounded-lg border px-1 py-2.5 text-center text-xs font-medium transition-colors duration-150 md:px-2 md:py-3 md:text-sm ${
-                        slot === s
-                          ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
-                          : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
-                      }`}
-                    >
-                      {s.replace(":", "h")}
-                    </button>
-                  ))}
+                  {slots.map((s) => {
+                    const past = isPastSlot(s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={past}
+                        onClick={() => setSlot(s)}
+                        data-testid={`time-slot-${s.replace(":", "")}`}
+                        className={`min-w-0 whitespace-nowrap rounded-lg border px-1 py-2.5 text-center text-xs font-medium transition-colors duration-150 md:px-2 md:py-3 md:text-sm ${
+                          past
+                            ? "cursor-not-allowed border-transparent bg-[#ece3d4] text-[#b3a394] line-through"
+                            : slot === s
+                              ? "border-transparent bg-[#2a1810] text-[#faf6f0]"
+                              : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
+                        }`}
+                      >
+                        {s.replace(":", "h")}
+                      </button>
+                    );
+                  })}
                 </div>
+                {isToday && (
+                  <p className="mt-2 text-xs text-muted-foreground" data-testid="past-slots-hint">
+                    Les créneaux déjà passés aujourd'hui sont désactivés.
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">

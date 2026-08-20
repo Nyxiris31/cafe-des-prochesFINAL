@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Bell, BellOff, Check, Coffee, LogOut, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, Check, Coffee, LogOut, Pencil, Plus, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
+import DrinkEditor from "@/components/DrinkEditor";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -23,6 +24,8 @@ export default function Admin() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"orders" | "drinks">("orders");
   const [pushOn, setPushOn] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editing, setEditing] = useState<Drink | null>(null);
 
   const { data: orders } = useQuery({
     queryKey: ["orders", "all"],
@@ -236,10 +239,20 @@ export default function Admin() {
 
         {tab === "drinks" && (
           <section className="mt-8 flex flex-col gap-3" data-testid="admin-drinks-panel">
+            <Button
+              className="h-12 self-start rounded-full"
+              onClick={() => {
+                setEditing(null);
+                setEditorOpen(true);
+              }}
+              data-testid="admin-add-drink-btn"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Ajouter une boisson
+            </Button>
             {(drinks ?? []).map((d) => (
               <div
                 key={d.id}
-                className="flex items-center gap-4 rounded-2xl border border-border bg-card p-3 shadow-sm"
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
                 data-testid={`admin-drink-row-${d.id}`}
               >
                 <img
@@ -256,6 +269,17 @@ export default function Admin() {
                     </span>
                   </p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(d);
+                    setEditorOpen(true);
+                  }}
+                  data-testid={`admin-drink-edit-btn-${d.id}`}
+                >
+                  <Pencil className="mr-1.5 h-4 w-4" /> Modifier
+                </Button>
                 <Switch
                   checked={d.available}
                   onCheckedChange={(available) => availability.mutate({ id: d.id, available })}
@@ -267,6 +291,8 @@ export default function Admin() {
           </section>
         )}
       </main>
+
+      <DrinkEditor open={editorOpen} drink={editing} onClose={() => setEditorOpen(false)} />
     </div>
   );
 }

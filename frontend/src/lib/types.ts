@@ -9,6 +9,28 @@ export interface Drink {
   composition: string[];
   allergens: string;
   available: boolean;
+  sort_order: number;
+}
+
+export interface DrinkCreate {
+  name: string;
+  category: string;
+  description: string;
+  image: string;
+  tagline?: string;
+  composition?: string[];
+  allergens?: string;
+}
+
+export interface DrinkUpdate {
+  name?: string;
+  category?: string;
+  description?: string;
+  image?: string;
+  tagline?: string;
+  composition?: string[];
+  allergens?: string;
+  available?: boolean;
 }
 
 export interface Order {
@@ -35,6 +57,7 @@ export interface OrderCreate {
 
 export interface TodayInfo {
   today: string;
+  now: string;
   slots: string[];
 }
 

@@ -20,11 +20,12 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export default function Home() {
   const { user } = useAuth();
   const { data: drinks } = useQuery({
-    queryKey: ["drinks", "chaudes"],
-    queryFn: () => apiGet<Drink[]>("/drinks?category=chaudes"),
+    queryKey: ["drinks", "all"],
+    queryFn: () => apiGet<Drink[]>("/drinks"),
   });
 
-  const list = drinks ?? [];
+  // The carousel mirrors the live catalog the admin edits (name, image, description).
+  const list = (drinks ?? []).filter((d) => d.available);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {

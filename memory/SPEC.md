@@ -30,13 +30,16 @@ Env: RESEND_API_KEY, SENDER_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SU
 PWA manifest at `frontend/public/manifest.webmanifest` (needed for push on iOS).
 
 ## Data
-Catalog hardcoded in `backend/routers/orders.py`; availability overrides in Mongo
-`drink_availability {drink_id, available}`.
-- chaudes: cafe-latte, cappuccino, espresso, viennois-chocolat, cafe-allonge, chocolat-chaud
-- fraiches: cafe-latte-glace (category shows "Bientôt disponible")
-
-Info dialog stays simple: short description + composition + allergens (no temperature, no cacao %,
-no prep time).
+Catalog lives in Mongo `drinks` (admin editable). `_ensure_seeded()` inserts the 7 original drinks
+on first read (migrating the legacy `drink_availability` flags). Admin can create/edit/delete a
+drink — name, category (chaudes/fraiches), tagline, description, composition, allergens and image
+(URL or an uploaded file downscaled client-side to a ~900 px JPEG data URL). Every surface (home
+carousel, kiosk, info dialog, order snapshots) reads the same records.
+The cold category shows its grid when at least one cold drink is available, otherwise the
+"Bientôt disponible" screen.
+Info dialog: large square image + short description + composition (hidden when empty) + allergens.
+Slots already gone today are disabled in the UI and rejected by the API (400 "Ce créneau est déjà
+passé"); a past date is rejected too. `GET /api/today` returns `today`, `now` (HH:MM) and `slots`.
 
 `Order` in Mongo `orders`: id (uuid), drink_id, drink_name, drink_image, date (YYYY-MM-DD),
 time (HH:MM — minutes 00 or 30), first_name, note?, user_id, user_email, created_at (aware UTC).
@@ -45,8 +48,9 @@ Collections: users, user_sessions, orders, drink_availability, push_subscription
 ## API (all on api_router, /api)
 - POST /api/auth/session · GET /api/auth/me · POST /api/auth/logout
 - GET /api/push/public-key · POST /api/push/subscribe (admin) · POST /api/push/unsubscribe (admin)
-- GET /api/today → { today, slots[] } (08:00→20:00 step 30)
+- GET /api/today → { today, now, slots[] } (08:00→20:00 step 30)
 - GET /api/drinks?category= → Drink[] (includes `available`)
+- POST /api/drinks (admin, 201) · PATCH /api/drinks/{id} (admin) · DELETE /api/drinks/{id} (admin)
 - PATCH /api/drinks/{id}/availability (admin) → Drink
 - GET /api/orders (own) · POST /api/orders (201; 409 if drink unavailable, 422 if time off-slot)
 - GET /api/orders/all (admin) · POST /api/orders/{id}/served (admin, 204) · DELETE /api/orders/{id}
