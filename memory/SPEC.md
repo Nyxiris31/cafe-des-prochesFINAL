@@ -4,9 +4,9 @@ Kiosk-style ordering app (French UI, PWA) so family can order a hot drink and bo
 Same two-column kiosk layout on phone and desktop.
 
 ## Auth & roles
-Netlify Identity with Google OAuth. The browser handles Identity callbacks and the Netlify Function
-reads the same-origin `nf_jwt` cookie. `ADMIN_EMAILS` decides `is_admin`; an Identity `admin` role is
-also accepted.
+Netlify Identity with Google OAuth or email/password. The browser handles Identity callbacks and the
+Netlify Function reads the same-origin `nf_jwt` cookie. Only `nyxiris.bs@gmail.com` and
+`gauthier.bonnaventuresauta@gmail.com` receive `is_admin` access.
 
 ## Routes
 - `/` Home (public) — hero + carousel (auto-advancing, motion transitions) with image + name +

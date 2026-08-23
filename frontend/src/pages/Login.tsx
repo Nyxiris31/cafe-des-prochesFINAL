@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthError, getUser, login, oauthLogin, signup } from "@netlify/identity";
+import { AuthError, getIdentityConfig, getUser, login, signup } from "@netlify/identity";
 import { ArrowLeft, Coffee, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
@@ -35,7 +35,15 @@ export default function Login() {
   if (!loading && user) return <Navigate to={from ?? (user.is_admin ? "/admin" : "/commander")} replace />;
 
   const signIn = () => {
-    oauthLogin("google");
+    const identity = getIdentityConfig();
+    if (!identity) {
+      setError("Le service de connexion n'est pas disponible sur ce site.");
+      return;
+    }
+    const oauthUrl = new URL(`${identity.url}/authorize`);
+    oauthUrl.searchParams.set("provider", "google");
+    oauthUrl.searchParams.set("prompt", "select_account");
+    window.location.assign(oauthUrl.toString());
   };
 
   const finishAuthentication = async () => {

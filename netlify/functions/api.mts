@@ -30,6 +30,10 @@ class HttpError extends Error {
 }
 
 const CATEGORIES = new Set(["chaudes", "fraiches"]);
+const AUTHORIZED_ADMIN_EMAILS = new Set([
+  "nyxiris.bs@gmail.com",
+  "gauthier.bonnaventuresauta@gmail.com",
+]);
 const SLOTS = Array.from({ length: 25 }, (_, index) => {
   const minutes = 8 * 60 + index * 30;
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
@@ -43,22 +47,17 @@ function noContent(headers?: HeadersInit): Response {
   return new Response(null, { status: 204, headers });
 }
 
-function adminEmails(): Set<string> {
-  return new Set(
-    (process.env.ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  );
+function authorizedAdminEmails(): Set<string> {
+  return AUTHORIZED_ADMIN_EMAILS;
 }
 
-function publicUser(row: typeof users.$inferSelect, hasAdminRole = false): User {
+function publicUser(row: typeof users.$inferSelect): User {
   return {
     user_id: row.id,
     email: row.email,
     name: row.name,
     picture: row.picture,
-    is_admin: hasAdminRole || adminEmails().has(row.email.toLowerCase()),
+    is_admin: authorizedAdminEmails().has(row.email.toLowerCase()),
   };
 }
 
@@ -191,7 +190,7 @@ async function currentUser(request: Request, required = true): Promise<User | nu
       [userRow] = await db.insert(users).values({ id: identity.id, email, name, picture }).returning();
     }
   }
-  return publicUser(userRow, identity.role === "admin" || identity.roles?.includes("admin") === true);
+  return publicUser(userRow);
 }
 
 async function requireAdmin(request: Request): Promise<User> {
@@ -218,7 +217,7 @@ function escapeHtml(value: string): string {
 
 async function sendOrderEmail(order: OrderRow): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
-  const recipients = [...adminEmails()];
+  const recipients = [...authorizedAdminEmails()];
   if (!apiKey || recipients.length === 0) return;
   const when = `${order.date} à ${order.time.replace(":", "h")}`;
   const html = `<div style="font-family:Arial,sans-serif;color:#2a1810"><h2>Nouvelle commande : ${escapeHtml(order.drinkName)}</h2><p><strong>Quand :</strong> ${escapeHtml(when)}</p><p><strong>Pour :</strong> ${escapeHtml(order.firstName)}</p><p><strong>Compte :</strong> ${escapeHtml(order.userEmail)}</p>${order.note ? `<p><strong>Note :</strong> ${escapeHtml(order.note)}</p>` : ""}</div>`;

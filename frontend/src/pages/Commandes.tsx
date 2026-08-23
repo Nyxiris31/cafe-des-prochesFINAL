@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { apiDelete, apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Order } from "@/lib/types";
 
 export default function Commandes() {
@@ -61,6 +62,7 @@ export default function Commandes() {
             >
               Commander
             </Link>
+            <ProfileAvatar user={user} />
             <LogoutButton />
           </div>
         </div>

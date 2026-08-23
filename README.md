@@ -6,8 +6,8 @@ implémentation FastAPI/MongoDB comme référence, mais il n'est pas utilisé pa
 
 Le schéma se trouve dans `db/schema.ts` et la migration initiale dans
 `netlify/database/migrations/`. Netlify applique automatiquement les migrations au déploiement.
-La configuration attend `ADMIN_EMAILS` pour les administrateurs et accepte facultativement
-`APP_TIMEZONE`, les variables Resend et les variables VAPID déjà décrites dans le projet.
+La configuration accepte facultativement `APP_TIMEZONE`, les variables Resend et les variables VAPID
+déjà décrites dans le projet. Les deux administrateurs autorisés sont définis côté serveur.
 Les utilisateurs peuvent se connecter avec Google ou avec un compte Identity email/mot de passe.
 
 ## Layout

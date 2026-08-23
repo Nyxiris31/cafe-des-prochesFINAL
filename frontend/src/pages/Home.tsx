@@ -14,6 +14,7 @@ import {
 import { apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Drink } from "@/lib/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -68,6 +69,7 @@ export default function Home() {
               >
                 Mes commandes
               </Link>
+              <ProfileAvatar user={user} />
               <LogoutButton />
             </>
           ) : (
