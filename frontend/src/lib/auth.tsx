@@ -1,7 +1,8 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useLocation } from "react-router-dom";
-import { apiGet, apiPost } from "@/lib/api";
+import { getUser, logout as identityLogout } from "@netlify/identity";
+import { apiGet } from "@/lib/api";
 import type { User } from "@/lib/types";
 
 interface AuthValue {
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["auth", "me"],
     queryFn: async () => {
       try {
+        if (!(await getUser())) return null;
         return await apiGet<User>("/auth/me");
       } catch {
         return null;
@@ -32,9 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logout = async () => {
-    await apiPost("/auth/logout");
-    queryClient.clear();
-    window.location.href = "/";
+    try {
+      await identityLogout();
+    } finally {
+      queryClient.clear();
+      window.location.href = "/";
+    }
   };
 
   return (

@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import LogoutButton from "@/components/LogoutButton";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Drink } from "@/lib/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -59,13 +61,17 @@ export default function Home() {
             </Link>
           )}
           {user ? (
-            <Link
-              to="/commandes"
-              className="inline-flex h-11 items-center rounded-full px-4 text-sm font-medium transition-colors duration-200 hover:bg-secondary"
-              data-testid="nav-my-orders-link"
-            >
-              Mes commandes
-            </Link>
+            <>
+              <Link
+                to="/commandes"
+                className="inline-flex h-11 items-center rounded-full px-4 text-sm font-medium transition-colors duration-200 hover:bg-secondary"
+                data-testid="nav-my-orders-link"
+              >
+                Mes commandes
+              </Link>
+              <ProfileAvatar user={user} />
+              <LogoutButton />
+            </>
           ) : (
             <Link
               to="/login"

@@ -4,15 +4,14 @@ Kiosk-style ordering app (French UI, PWA) so family can order a hot drink and bo
 Same two-column kiosk layout on phone and desktop.
 
 ## Auth & roles
-Emergent-managed Google OAuth. `POST /api/auth/session` exchanges the `#session_id` for a
-`session_token` stored in Mongo `user_sessions` + httpOnly cookie (7 days).
-`ADMIN_EMAILS` (backend/.env) decides `is_admin` — currently gauthier.bonnaventuresauta@gmail.com
-and nyxiris.bs@gmail.com. See memory/test_credentials.md.
+Netlify Identity with Google OAuth or email/password. The browser handles Identity callbacks and the
+Netlify Function reads the same-origin `nf_jwt` cookie. Only `nyxiris.bs@gmail.com` and
+`gauthier.bonnaventuresauta@gmail.com` receive `is_admin` access.
 
 ## Routes
 - `/` Home (public) — hero + carousel (auto-advancing, motion transitions) with image + name +
   description only. CTA "Commander" → /login when signed out.
-- `/login` — "Continuer avec Google".
+- `/login` — connexion Google ou email/mot de passe, création de compte et confirmation email.
 - `/commander` (auth) — kiosk: left category rail, empty state
   "Aucune catégorie sélectionnée, veuillez en choisir une"; hot drinks grid (whole card clickable →
   fullscreen agenda: calendar with month/year dropdowns + 30-min slots + prénom + note); the "i"
@@ -30,8 +29,8 @@ Env: RESEND_API_KEY, SENDER_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SU
 PWA manifest at `frontend/public/manifest.webmanifest` (needed for push on iOS).
 
 ## Data
-Catalog lives in Mongo `drinks` (admin editable). `_ensure_seeded()` inserts the 7 original drinks
-on first read (migrating the legacy `drink_availability` flags). Admin can create/edit/delete a
+Catalog lives in Netlify Database/Postgres `drinks` (admin editable). The initial migration inserts
+the 7 original drinks. Admin can create/edit/delete a
 drink — name, category (chaudes/fraiches), tagline, description, composition, allergens and image
 (URL or an uploaded file downscaled client-side to a ~900 px JPEG data URL). Every surface (home
 carousel, kiosk, info dialog, order snapshots) reads the same records.
@@ -41,12 +40,12 @@ Info dialog: large square image + short description + composition (hidden when e
 Slots already gone today are disabled in the UI and rejected by the API (400 "Ce créneau est déjà
 passé"); a past date is rejected too. `GET /api/today` returns `today`, `now` (HH:MM) and `slots`.
 
-`Order` in Mongo `orders`: id (uuid), drink_id, drink_name, drink_image, date (YYYY-MM-DD),
+`Order` in Postgres `orders`: id (uuid), drink_id, drink_name, drink_image, date (YYYY-MM-DD),
 time (HH:MM — minutes 00 or 30), first_name, note?, user_id, user_email, created_at (aware UTC).
-Collections: users, user_sessions, orders, drink_availability, push_subscriptions.
+Tables: users, drinks, orders, push_subscriptions.
 
 ## API (all on api_router, /api)
-- POST /api/auth/session · GET /api/auth/me · POST /api/auth/logout
+- GET /api/auth/me (session and logout are managed by Netlify Identity)
 - GET /api/push/public-key · POST /api/push/subscribe (admin) · POST /api/push/unsubscribe (admin)
 - GET /api/today → { today, now, slots[] } (08:00→20:00 step 30)
 - GET /api/drinks?category= → Drink[] (includes `available`)

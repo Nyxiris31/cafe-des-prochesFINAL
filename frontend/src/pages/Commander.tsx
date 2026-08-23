@@ -20,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import LogoutButton from "@/components/LogoutButton";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Drink, Order, TodayInfo } from "@/lib/types";
 
 const CATEGORIES = [
@@ -138,6 +140,8 @@ export default function Commander() {
             >
               Commandes
             </Link>
+            <ProfileAvatar user={user} />
+            <LogoutButton />
           </div>
         </header>
 

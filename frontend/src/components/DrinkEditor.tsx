@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiDelete, apiPatch, apiPost } from "@/lib/api";
 import type { Drink } from "@/lib/types";
 
-/** Downscales an uploaded picture to a data URL so it fits comfortably in Mongo. */
+/** Downscales an uploaded picture before storing it with the drink record. */
 async function fileToDataUrl(file: File, max = 900): Promise<string> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));

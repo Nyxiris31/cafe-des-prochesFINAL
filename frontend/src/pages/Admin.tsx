@@ -7,6 +7,7 @@ import { ArrowLeft, Bell, BellOff, Check, Coffee, LogOut, Pencil, Plus, ShieldCh
 import { toast } from "sonner";
 
 import DrinkEditor from "@/components/DrinkEditor";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
@@ -134,6 +135,7 @@ export default function Admin() {
           >
             <LogOut className="h-4 w-4" /> Déconnexion
           </button>
+          <ProfileAvatar user={user} />
         </div>
       </header>
 

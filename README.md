@@ -1,9 +1,14 @@
-# farm-ts
+# Le Café des Proches
 
-Minimal split backend/frontend starter: **FastAPI + MongoDB** behind a
-**Vite + React 19 + TypeScript** frontend, joined by a small typed fetch layer
-over `/api`. This is a bare skeleton — no app features are implemented. Build on
-top of it.
+Le déploiement Netlify utilise un frontend Vite/React, une Function TypeScript sous `/api/*`,
+Netlify Identity et Netlify Database avec Drizzle. Le dossier `backend/` conserve l'ancienne
+implémentation FastAPI/MongoDB comme référence, mais il n'est pas utilisé par `netlify.toml`.
+
+Le schéma se trouve dans `db/schema.ts` et la migration initiale dans
+`netlify/database/migrations/`. Netlify applique automatiquement les migrations au déploiement.
+La configuration accepte facultativement `APP_TIMEZONE`, les variables Resend et les variables VAPID
+déjà décrites dans le projet. Les deux administrateurs autorisés sont définis côté serveur.
+Les utilisateurs peuvent se connecter avec Google ou avec un compte Identity email/mot de passe.
 
 ## Layout
 
