@@ -1,17 +1,80 @@
-import { Link, Navigate, useLocation } from "react-router-dom";
-import { Coffee, ArrowLeft } from "lucide-react";
-import { oauthLogin } from "@netlify/identity";
+import { useState, type FormEvent } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { AuthError, getUser, login, oauthLogin, signup } from "@netlify/identity";
+import { ArrowLeft, Coffee, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import type { User } from "@/lib/types";
+
+type AuthMode = "login" | "signup";
+
+function identityErrorMessage(error: unknown): string {
+  if (!(error instanceof AuthError)) return "Une erreur inattendue est survenue. Réessaie.";
+  if (error.status === 401) return "Email ou mot de passe incorrect.";
+  if (error.status === 403) return "Les inscriptions ne sont pas autorisées sur ce site.";
+  if (error.status === 422) return "Vérifie ton email et utilise un mot de passe suffisamment sécurisé.";
+  if (error.status === 409) return "Un compte existe déjà avec cet email.";
+  return error.message || "La connexion a échoué. Réessaie.";
+}
 
 export default function Login() {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const from = (location.state as { from?: string } | null)?.from;
+  const [mode, setMode] = useState<AuthMode>("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   if (!loading && user) return <Navigate to={from ?? (user.is_admin ? "/admin" : "/commander")} replace />;
 
   const signIn = () => {
     oauthLogin("google");
+  };
+
+  const finishAuthentication = async () => {
+    const appUser = await apiGet<User>("/auth/me");
+    queryClient.setQueryData(["auth", "me"], appUser);
+    navigate(from ?? (appUser.is_admin ? "/admin" : "/commander"), { replace: true });
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setNotice(null);
+    if (mode === "signup" && name.trim().length < 2) {
+      setError("Indique ton prénom ou ton nom.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    setPending(true);
+    try {
+      if (mode === "login") {
+        await login(email.trim(), password);
+        await finishAuthentication();
+      } else {
+        await signup(email.trim(), password, { full_name: name.trim() });
+        const currentIdentityUser = await getUser();
+        if (!currentIdentityUser) {
+          setNotice("Compte créé. Consulte ta boîte mail pour confirmer ton adresse avant de te connecter.");
+        } else {
+          await finishAuthentication();
+        }
+      }
+    } catch (authError) {
+      setError(identityErrorMessage(authError));
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -32,9 +95,87 @@ export default function Login() {
           Connexion au café
         </h1>
         <p className="text-muted-foreground">
-          Connecte-toi avec Google pour commander une boisson et suivre tes créneaux. Le
-          propriétaire du café est reconnu automatiquement comme administrateur.
+          Connecte-toi pour commander une boisson et suivre tes créneaux. Google ou email et mot de passe,
+          à toi de choisir.
         </p>
+        <div className="flex w-full rounded-full bg-secondary p-1" role="tablist" aria-label="Mode d'authentification">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "login"}
+            onClick={() => { setMode("login"); setError(null); setNotice(null); }}
+            className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
+              mode === "login" ? "bg-white text-[#2a1810] shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            Se connecter
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "signup"}
+            onClick={() => { setMode("signup"); setError(null); setNotice(null); }}
+            className={`flex-1 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
+              mode === "signup" ? "bg-white text-[#2a1810] shadow-sm" : "text-muted-foreground"
+            }`}
+          >
+            Créer un compte
+          </button>
+        </div>
+        <form onSubmit={submit} className="flex w-full flex-col gap-4" noValidate>
+          {mode === "signup" && (
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              Nom affiché
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                autoComplete="name"
+                required
+                className="h-12 rounded-2xl border border-[#d8cab8] bg-white px-4 outline-none transition focus:border-[#8a4b20] focus:ring-2 focus:ring-[#8a4b20]/20"
+                placeholder="Ton prénom"
+              />
+            </label>
+          )}
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+              className="h-12 rounded-2xl border border-[#d8cab8] bg-white px-4 outline-none transition focus:border-[#8a4b20] focus:ring-2 focus:ring-[#8a4b20]/20"
+              placeholder="toi@exemple.com"
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            Mot de passe
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              minLength={8}
+              required
+              className="h-12 rounded-2xl border border-[#d8cab8] bg-white px-4 outline-none transition focus:border-[#8a4b20] focus:ring-2 focus:ring-[#8a4b20]/20"
+              placeholder="8 caractères minimum"
+            />
+          </label>
+          {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{error}</p>}
+          {notice && <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{notice}</p>}
+          <button
+            type="submit"
+            disabled={pending}
+            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#2a1810] px-8 text-base font-semibold text-[#faf6f0] shadow-lg transition-colors duration-200 hover:bg-[#8a4b20] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {pending && <Loader2 className="h-5 w-5 animate-spin" />}
+            {mode === "login" ? "Se connecter avec email" : "Créer mon compte"}
+          </button>
+        </form>
+        <div className="flex w-full items-center gap-3 text-xs uppercase tracking-widest text-muted-foreground">
+          <span className="h-px flex-1 bg-[#d8cab8]" /> ou <span className="h-px flex-1 bg-[#d8cab8]" />
+        </div>
         <button
           type="button"
           onClick={signIn}

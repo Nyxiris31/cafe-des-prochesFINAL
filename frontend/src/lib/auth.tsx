@@ -34,9 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logout = async () => {
-    await identityLogout();
-    queryClient.clear();
-    window.location.href = "/";
+    try {
+      await identityLogout();
+    } finally {
+      queryClient.clear();
+      window.location.href = "/";
+    }
   };
 
   return (

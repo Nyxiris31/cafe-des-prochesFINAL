@@ -11,7 +11,7 @@ also accepted.
 ## Routes
 - `/` Home (public) — hero + carousel (auto-advancing, motion transitions) with image + name +
   description only. CTA "Commander" → /login when signed out.
-- `/login` — "Continuer avec Google".
+- `/login` — connexion Google ou email/mot de passe, création de compte et confirmation email.
 - `/commander` (auth) — kiosk: left category rail, empty state
   "Aucune catégorie sélectionnée, veuillez en choisir une"; hot drinks grid (whole card clickable →
   fullscreen agenda: calendar with month/year dropdowns + 30-min slots + prénom + note); the "i"
