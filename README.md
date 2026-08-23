@@ -7,7 +7,9 @@ implémentation FastAPI/MongoDB comme référence, mais il n'est pas utilisé pa
 Le schéma se trouve dans `db/schema.ts` et la migration initiale dans
 `netlify/database/migrations/`. Netlify applique automatiquement les migrations au déploiement.
 La configuration accepte facultativement `APP_TIMEZONE`, les variables Resend et les variables VAPID
-déjà décrites dans le projet. Les deux administrateurs autorisés sont définis côté serveur.
+déjà décrites dans le projet. Les deux administrateurs autorisés sont définis côté serveur. Le bouton
+« Activer les notifs » demande la permission du navigateur et utilise Web Push quand les variables VAPID
+sont configurées ; sinon, il active les notifications du site pendant que le tableau d’administration est ouvert.
 Les utilisateurs peuvent se connecter avec Google ou avec un compte Identity email/mot de passe.
 
 ## Layout
