@@ -130,7 +130,7 @@ export default function Home() {
           <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
             {current ? (
               <>
-                <div className="relative aspect-square w-full overflow-hidden bg-[#f7f3ee]">
+                <div className="relative aspect-[1.04/1] w-full overflow-hidden bg-[#f7f3ee]">
                   <AnimatePresence mode="wait">
                     <motion.img
                       key={current.id}
