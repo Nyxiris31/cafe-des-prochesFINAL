@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Coffee } from "lucide-react";
-import { apiPost } from "@/lib/api";
+import { handleAuthCallback } from "@netlify/identity";
+import { apiGet } from "@/lib/api";
 import type { User } from "@/lib/types";
 
 /**
- * Handles `#session_id=...` returned by Emergent Google auth: exchanges it server-side
- * (httpOnly cookie) then lands the user on the kiosk.
+ * Handles the callback returned by Netlify Identity, then lands the user on the kiosk.
  */
 export default function AuthCallback() {
   const location = useLocation();
@@ -20,15 +20,14 @@ export default function AuthCallback() {
     if (processed.current) return;
     processed.current = true;
 
-    const sessionId = new URLSearchParams(location.hash.replace(/^#/, "")).get("session_id");
-    if (!sessionId) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
     (async () => {
       try {
-        const user = await apiPost<User>("/auth/session", { session_id: sessionId });
+        const result = await handleAuthCallback();
+        if (!result?.user) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        const user = await apiGet<User>("/auth/me");
         queryClient.setQueryData(["auth", "me"], user);
         window.history.replaceState(null, "", window.location.pathname);
         navigate(user.is_admin ? "/admin" : "/commander", { replace: true });

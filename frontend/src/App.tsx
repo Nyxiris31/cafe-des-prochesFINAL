@@ -9,9 +9,10 @@ import { AuthProvider, RequireAuth } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
-  // Emergent auth returns to `#session_id=...`; handle it before any route renders.
   const location = useLocation();
-  const isAuthCallback = location.hash?.includes("session_id=");
+  const isAuthCallback = /(?:access|confirmation|recovery|invite|email_change)_token=/.test(
+    location.hash,
+  );
 
   return (
     <AuthProvider>

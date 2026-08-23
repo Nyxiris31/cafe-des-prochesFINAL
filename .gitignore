@@ -90,3 +90,9 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# Local Netlify state; keep deployment feature markers and agent results.
+.netlify/*
+!.netlify/features/
+!.netlify/features/netlify-identity
+!.netlify/results.md

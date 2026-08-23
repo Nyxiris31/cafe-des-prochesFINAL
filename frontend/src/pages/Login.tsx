@@ -1,5 +1,6 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { Coffee, ArrowLeft } from "lucide-react";
+import { oauthLogin } from "@netlify/identity";
 import { useAuth } from "@/lib/auth";
 
 export default function Login() {
@@ -10,9 +11,7 @@ export default function Login() {
   if (!loading && user) return <Navigate to={from ?? (user.is_admin ? "/admin" : "/commander")} replace />;
 
   const signIn = () => {
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin + "/commander";
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    oauthLogin("google");
   };
 
   return (

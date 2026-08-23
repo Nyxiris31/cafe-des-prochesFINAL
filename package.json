@@ -1,0 +1,24 @@
+{
+  "name": "le-cafe-des-proches-netlify",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace frontend",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@netlify/database": "latest",
+    "@netlify/identity": "^2.0.0",
+    "drizzle-orm": "beta",
+    "web-push": "latest"
+  },
+  "devDependencies": {
+    "@netlify/functions": "latest",
+    "@types/web-push": "latest",
+    "drizzle-kit": "beta",
+    "typescript": "latest"
+  }
+}
