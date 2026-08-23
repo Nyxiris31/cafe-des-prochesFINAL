@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
@@ -14,6 +14,8 @@ import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Drink, Order, PushKey } from "@/lib/types";
 
+const NOTIFICATIONS_ENABLED_KEY = "cafe-notifications-enabled";
+
 function urlBase64ToUint8Array(base64: string): Uint8Array {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const raw = atob((base64 + padding).replace(/-/g, "+").replace(/_/g, "/"));
@@ -24,9 +26,11 @@ export default function Admin() {
   const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"orders" | "drinks">("orders");
-  const [pushOn, setPushOn] = useState(false);
+  const [notificationsOn, setNotificationsOn] = useState(false);
+  const [notificationMode, setNotificationMode] = useState<"push" | "browser" | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Drink | null>(null);
+  const knownOrderIds = useRef<Set<string> | null>(null);
 
   const { data: orders } = useQuery({
     queryKey: ["orders", "all"],
@@ -39,12 +43,33 @@ export default function Admin() {
   });
 
   useEffect(() => {
+    const enabled = localStorage.getItem(NOTIFICATIONS_ENABLED_KEY) === "true";
+    if (!enabled || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+
+    setNotificationsOn(true);
     navigator.serviceWorker
       ?.getRegistration()
       .then((reg) => reg?.pushManager.getSubscription())
-      .then((sub) => setPushOn(Boolean(sub)))
-      .catch(() => setPushOn(false));
+      .then((sub) => setNotificationMode(sub ? "push" : "browser"))
+      .catch(() => setNotificationMode("browser"));
   }, []);
+
+  useEffect(() => {
+    if (!orders) return;
+    const currentIds = new Set(orders.map((order) => order.id));
+    const previousIds = knownOrderIds.current;
+    knownOrderIds.current = currentIds;
+    if (!previousIds || !notificationsOn || notificationMode !== "browser") return;
+
+    orders
+      .filter((order) => !previousIds.has(order.id))
+      .forEach((order) => {
+        new Notification("Nouvelle commande", {
+          body: `${order.drink_name} — ${order.date} à ${order.time.replace(":", "h")} pour ${order.first_name}`,
+          icon: "/favicon.svg",
+        });
+      });
+  }, [orders, notificationMode, notificationsOn]);
 
   const served = useMutation({
     mutationFn: (id: string) => apiPost<void>(`/orders/${id}/served`),
@@ -67,10 +92,10 @@ export default function Admin() {
     onError: () => toast.error("Mise à jour impossible."),
   });
 
-  async function enablePush() {
+  async function enableNotifications() {
     try {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        toast.error("Ce navigateur ne gère pas les notifications push.");
+      if (typeof Notification === "undefined") {
+        toast.error("Ce navigateur ne gère pas les notifications du site.");
         return;
       }
       const permission = await Notification.requestPermission();
@@ -78,27 +103,44 @@ export default function Admin() {
         toast.error("Notifications refusées par le navigateur.");
         return;
       }
-      const reg = await navigator.serviceWorker.register("/sw.js");
-      const { public_key } = await apiGet<PushKey>("/push/public-key");
-      if (!public_key) {
-        toast.error("Clé de notification manquante côté serveur.");
+
+      localStorage.setItem(NOTIFICATIONS_ENABLED_KEY, "true");
+      setNotificationsOn(true);
+
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        setNotificationMode("browser");
+        toast.success("Notifications du site activées sur cet appareil.");
         return;
       }
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(public_key) as BufferSource,
-      });
-      const json = sub.toJSON() as { endpoint?: string; keys?: Record<string, string> };
-      await apiPost("/push/subscribe", { endpoint: json.endpoint, keys: json.keys });
-      setPushOn(true);
-      toast.success("Notifications activées sur cet appareil.");
+
+      try {
+        const reg = await navigator.serviceWorker.register("/sw.js");
+        const { public_key } = await apiGet<PushKey>("/push/public-key");
+        if (!public_key) throw new Error("VAPID public key missing");
+        const existing = await reg.pushManager.getSubscription();
+        const sub = existing ?? (await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(public_key) as BufferSource,
+        }));
+        const json = sub.toJSON() as { endpoint?: string; keys?: Record<string, string> };
+        await apiPost("/push/subscribe", { endpoint: json.endpoint, keys: json.keys });
+        setNotificationMode("push");
+        toast.success("Notifications activées sur cet appareil.");
+      } catch {
+        setNotificationMode("browser");
+        toast.success("Notifications du site activées sur cet appareil.");
+      }
     } catch {
+      localStorage.removeItem(NOTIFICATIONS_ENABLED_KEY);
+      setNotificationsOn(false);
+      setNotificationMode(null);
       toast.error("Activation des notifications impossible.");
     }
   }
 
-  async function disablePush() {
-    const reg = await navigator.serviceWorker.getRegistration();
+  async function disableNotifications() {
+    localStorage.removeItem(NOTIFICATIONS_ENABLED_KEY);
+    const reg = await navigator.serviceWorker?.getRegistration();
     const sub = await reg?.pushManager.getSubscription();
     if (sub) {
       const json = sub.toJSON() as { endpoint?: string; keys?: Record<string, string> };
@@ -107,7 +149,8 @@ export default function Admin() {
       );
       await sub.unsubscribe();
     }
-    setPushOn(false);
+    setNotificationsOn(false);
+    setNotificationMode(null);
     toast.success("Notifications désactivées.");
   }
 
@@ -181,11 +224,11 @@ export default function Admin() {
           <Button
             variant="outline"
             className="h-12 rounded-full"
-            onClick={() => (pushOn ? disablePush() : enablePush())}
+            onClick={() => (notificationsOn ? disableNotifications() : enableNotifications())}
             data-testid="admin-push-toggle-btn"
           >
-            {pushOn ? <BellOff className="mr-2 h-4 w-4" /> : <Bell className="mr-2 h-4 w-4" />}
-            {pushOn ? "Notifs activées" : "Activer les notifs"}
+            {notificationsOn ? <BellOff className="mr-2 h-4 w-4" /> : <Bell className="mr-2 h-4 w-4" />}
+            {notificationsOn ? "Notifs activées" : "Activer les notifs"}
           </Button>
         </div>
 
