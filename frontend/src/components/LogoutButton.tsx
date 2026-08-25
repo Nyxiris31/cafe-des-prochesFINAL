@@ -8,10 +8,12 @@ export default function LogoutButton() {
     <button
       type="button"
       onClick={logout}
-      className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-[#2a1810] transition-colors hover:bg-[#f3ece0] sm:h-11 sm:px-4 sm:text-sm"
+      aria-label="Déconnexion"
+      title="Déconnexion"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full px-2 text-xs font-medium text-[#2a1810] transition-colors hover:bg-[#f3ece0] sm:h-11 sm:w-auto sm:justify-start sm:gap-1.5 sm:px-4 sm:text-sm"
       data-testid="logout-btn"
     >
-      <LogOut className="h-4 w-4" /> Déconnexion
+      <LogOut className="h-4 w-4 shrink-0" /> <span className="hidden sm:inline">Déconnexion</span>
     </button>
   );
 }

@@ -3,7 +3,17 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Coffee, Flame, Info, Snowflake, MoveLeft, Check, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ClipboardList,
+  Coffee,
+  Flame,
+  Info,
+  MoveLeft,
+  ShieldCheck,
+  Snowflake,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -25,8 +35,8 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Drink, Order, TodayInfo } from "@/lib/types";
 
 const CATEGORIES = [
-  { id: "chaudes", label: "Boissons chaudes", hint: "Cafés & chocolats réconfortants" },
-  { id: "fraiches", label: "Boissons fraîches", hint: "Thés glacés & cafés frappés" },
+  { id: "chaudes", label: "Boisson chaude", hint: "Cafés & chocolats réconfortants" },
+  { id: "fraiches", label: "Boisson froide", hint: "Thés glacés & cafés frappés" },
 ] as const;
 
 type CategoryId = (typeof CATEGORIES)[number]["id"];
@@ -40,7 +50,7 @@ function toIsoDate(d: Date): string {
 export default function Commander() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [category, setCategory] = useState<CategoryId | null>(null);
+  const [category, setCategory] = useState<CategoryId>("chaudes");
   const [infoDrink, setInfoDrink] = useState<Drink | null>(null);
   const [bookingDrink, setBookingDrink] = useState<Drink | null>(null);
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -109,13 +119,13 @@ export default function Commander() {
   return (
     <div className="min-h-screen bg-background px-2 py-3 sm:px-4 sm:py-5 md:px-8" data-testid="commander-page">
       <div className="mx-auto flex min-h-[calc(100dvh-1.5rem)] max-w-6xl flex-col overflow-hidden rounded-3xl border border-[#d8cab8] bg-[#efe8dc] p-3 shadow-xl md:p-6">
-        <header className="flex items-center justify-between gap-2 border-b border-[#d8cab8] pb-4">
+        <header className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-[#d8cab8] pb-4">
           <Link
             to="/"
             className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors duration-200 hover:bg-[#f3ece0]"
             data-testid="kiosk-back-home-link"
           >
-            <ArrowLeft className="h-4 w-4" /> Accueil
+            <ArrowLeft className="h-4 w-4 shrink-0" /> <span>Accueil</span>
           </Link>
           <div className="flex items-center gap-2">
             <Coffee className="h-5 w-5 text-[#8a4b20]" />
@@ -123,31 +133,32 @@ export default function Commander() {
               Borne de commande
             </span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 items-center justify-end gap-1">
             {user?.is_admin && (
               <Link
                 to="/admin"
                 className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#2a1810] px-3 text-xs font-semibold text-[#faf6f0] transition-colors duration-200 hover:bg-[#8a4b20]"
                 data-testid="kiosk-admin-link"
               >
-                <ShieldCheck className="h-3.5 w-3.5" /> Admin
+                <ShieldCheck className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Admin</span>
               </Link>
             )}
             <Link
               to="/commandes"
-              className="inline-flex h-10 items-center rounded-full px-3 text-sm font-medium transition-colors duration-200 hover:bg-[#f3ece0]"
+              aria-label="Mes commandes"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full px-2 text-sm font-medium transition-colors duration-200 hover:bg-[#f3ece0] sm:h-10 sm:w-auto sm:justify-start sm:px-3"
               data-testid="kiosk-my-orders-link"
             >
-              Commandes
+              <ClipboardList className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Commandes</span>
             </Link>
             <ProfileAvatar user={user} />
             <LogoutButton />
           </div>
         </header>
 
-        {/* Same two-column kiosk layout on phone and desktop */}
         <div className="grid flex-1 grid-cols-12 gap-3 pt-5 md:gap-6">
-          <aside className="col-span-4 flex flex-col gap-2 md:col-span-4 lg:col-span-3">
+          <aside className="col-span-5 flex flex-col gap-2 md:col-span-4 lg:col-span-3">
             <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground md:text-xs">
               Catégories
             </p>
@@ -159,13 +170,13 @@ export default function Commander() {
                   type="button"
                   onClick={() => setCategory(c.id)}
                   data-testid={`kiosk-category-${c.id}-btn`}
-                  className={`flex w-full flex-col items-start gap-1 rounded-2xl border px-2.5 py-3 text-left transition-colors duration-200 md:px-4 md:py-4 ${
+                  className={`flex min-h-24 w-full flex-col items-start justify-center gap-1.5 rounded-2xl border px-3 py-3 text-left transition-colors duration-200 md:min-h-0 md:px-4 md:py-4 ${
                     active
                       ? "border-transparent bg-[#2a1810] text-[#faf6f0] shadow-md"
                       : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
                   }`}
                 >
-                  <span className="flex items-start gap-1.5 text-xs font-bold uppercase leading-tight tracking-wide md:text-base">
+                  <span className="flex items-start gap-1.5 text-[11px] font-bold uppercase leading-tight tracking-wide md:text-base">
                     {c.id === "chaudes" ? (
                       <Flame className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4" />
                     ) : (
@@ -174,7 +185,7 @@ export default function Commander() {
                     {c.label}
                   </span>
                   <span
-                    className={`text-[10px] leading-tight md:text-xs ${
+                    className={`text-[10px] leading-snug md:text-xs ${
                       active ? "text-[#d8cab8]" : "text-muted-foreground"
                     }`}
                   >
@@ -185,7 +196,7 @@ export default function Commander() {
             })}
           </aside>
 
-          <main className="col-span-8 md:col-span-8 lg:col-span-9">
+          <main className="col-span-7 min-w-0 md:col-span-8 lg:col-span-9">
             {category === null && (
               <div
                 className="flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[#d8cab8] bg-[#f7f3ee] p-5 text-center md:p-10"
@@ -195,8 +206,9 @@ export default function Commander() {
                   <span className="absolute -top-6 left-1/2 h-6 w-1.5 -translate-x-1/2 rounded-full bg-[#d8cab8] animate-steam" />
                   <Coffee className="h-10 w-10 text-[#8a4b20] md:h-14 md:w-14" />
                 </div>
-                <h2 className="max-w-sm font-heading text-lg leading-snug tracking-tight md:text-2xl">
-                  Aucune catégorie sélectionnée, veuillez en choisir une
+                <h2 className="max-w-full font-heading text-base leading-snug tracking-tight sm:text-lg md:max-w-sm md:text-2xl">
+                  <span className="sm:hidden">Choisissez une catégorie</span>
+                  <span className="hidden sm:inline">Aucune catégorie sélectionnée, veuillez en choisir une</span>
                 </h2>
                 <p className="inline-flex items-center gap-2 text-xs text-muted-foreground md:text-sm">
                   <MoveLeft className="h-4 w-4 animate-nudge-left" /> Choisissez une catégorie sur la
@@ -237,7 +249,7 @@ export default function Commander() {
                     Carte momentanément indisponible.
                   </p>
                 )}
-                <div className="grid grid-cols-2 gap-2.5 md:gap-4 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
                   {(shownDrinks ?? []).map((d) => (
                     <div
                       key={d.id}

@@ -31,7 +31,7 @@ class HttpError extends Error {
 
 const CATEGORIES = new Set(["chaudes", "fraiches"]);
 const AUTHORIZED_ADMIN_EMAILS = new Set([
-  "nyxiris.bs@gmail.com",
+  "nysira.bs@gmail.com",
   "gauthier.bonnaventuresauta@gmail.com",
 ]);
 const SLOTS = Array.from({ length: 25 }, (_, index) => {

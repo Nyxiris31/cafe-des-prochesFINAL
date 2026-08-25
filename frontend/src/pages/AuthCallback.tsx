@@ -5,6 +5,7 @@ import { Coffee } from "lucide-react";
 import { handleAuthCallback } from "@netlify/identity";
 import { apiGet } from "@/lib/api";
 import type { User } from "@/lib/types";
+import { markSession } from "@/lib/session";
 
 /**
  * Handles the callback returned by Netlify Identity, then lands the user on the kiosk.
@@ -27,10 +28,13 @@ export default function AuthCallback() {
           navigate("/login", { replace: true });
           return;
         }
+        markSession();
         const user = await apiGet<User>("/auth/me");
         queryClient.setQueryData(["auth", "me"], user);
         window.history.replaceState(null, "", window.location.pathname);
-        navigate(user.is_admin ? "/admin" : "/commander", { replace: true });
+        const redirectTo = sessionStorage.getItem("auth_redirect");
+        sessionStorage.removeItem("auth_redirect");
+        navigate(redirectTo ?? (user.is_admin ? "/admin" : "/commander"), { replace: true });
       } catch {
         setError("La connexion a échoué. Réessaie depuis la page de connexion.");
       }
