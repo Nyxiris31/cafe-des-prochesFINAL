@@ -1,20 +1,23 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useLocation } from "react-router-dom";
-import { getUser, logout as identityLogout } from "@netlify/identity";
+import { AUTH_EVENTS, getUser, logout as identityLogout, onAuthChange } from "@netlify/identity";
 import { apiGet } from "@/lib/api";
+import { clearSessionMarker, hasSessionMarker } from "@/lib/session";
 import type { User } from "@/lib/types";
 
 interface AuthValue {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
+  switchAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthValue>({
   user: null,
   loading: true,
   logout: async () => {},
+  switchAccount: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -23,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["auth", "me"],
     queryFn: async () => {
       try {
+        if (!hasSessionMarker()) return null;
         if (!(await getUser())) return null;
         return await apiGet<User>("/auth/me");
       } catch {
@@ -33,17 +37,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
 
-  const logout = async () => {
+  useEffect(() => {
+    return onAuthChange((event) => {
+      if (event === AUTH_EVENTS.LOGOUT) {
+        queryClient.setQueryData(["auth", "me"], null);
+        queryClient.removeQueries({ queryKey: ["orders"] });
+      } else {
+        void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+      }
+    });
+  }, [queryClient]);
+
+  const leaveSession = async (redirectTo: string) => {
     try {
       await identityLogout();
     } finally {
+      clearSessionMarker();
       queryClient.clear();
-      window.location.href = "/";
+      window.location.href = redirectTo;
     }
   };
 
+  const logout = () => leaveSession("/");
+  const switchAccount = () => leaveSession("/login");
+
   return (
-    <AuthContext.Provider value={{ user: data ?? null, loading: isLoading, logout }}>
+    <AuthContext.Provider
+      value={{ user: data ?? null, loading: isLoading, logout, switchAccount }}
+    >
       {children}
     </AuthContext.Provider>
   );

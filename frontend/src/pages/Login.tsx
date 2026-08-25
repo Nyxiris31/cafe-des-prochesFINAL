@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthError, getIdentityConfig, getUser, login, signup } from "@netlify/identity";
+import { AuthError, getIdentityConfig, getUser, login, oauthLogin, signup } from "@netlify/identity";
 import { ArrowLeft, Coffee, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { markSession } from "@/lib/session";
 import type { User } from "@/lib/types";
 
 type AuthMode = "login" | "signup";
@@ -40,10 +41,8 @@ export default function Login() {
       setError("Le service de connexion n'est pas disponible sur ce site.");
       return;
     }
-    const oauthUrl = new URL(`${identity.url}/authorize`);
-    oauthUrl.searchParams.set("provider", "google");
-    oauthUrl.searchParams.set("prompt", "select_account");
-    window.location.assign(oauthUrl.toString());
+    sessionStorage.setItem("auth_redirect", from ?? "/commander");
+    oauthLogin("google");
   };
 
   const finishAuthentication = async () => {
@@ -68,6 +67,7 @@ export default function Login() {
     try {
       if (mode === "login") {
         await login(email.trim(), password);
+        markSession();
         await finishAuthentication();
       } else {
         await signup(email.trim(), password, { full_name: name.trim() });
@@ -75,6 +75,7 @@ export default function Login() {
         if (!currentIdentityUser) {
           setNotice("Compte créé. Consulte ta boîte mail pour confirmer ton adresse avant de te connecter.");
         } else {
+          markSession();
           await finishAuthentication();
         }
       }
