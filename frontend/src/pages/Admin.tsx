@@ -252,6 +252,8 @@ export default function Admin() {
                     <img
                       src={o.drink_image}
                       alt={o.drink_name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-20 w-20 shrink-0 rounded-2xl object-cover"
                     />
                     <div className="min-w-0 flex-1">
@@ -303,6 +305,8 @@ export default function Admin() {
                 <img
                   src={d.image}
                   alt={d.name}
+                  loading="lazy"
+                  decoding="async"
                   className="h-14 w-14 shrink-0 rounded-xl object-cover"
                 />
                 <div className="min-w-0 flex-1">

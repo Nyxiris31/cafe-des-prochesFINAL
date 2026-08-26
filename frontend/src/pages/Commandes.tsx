@@ -126,6 +126,8 @@ export default function Commandes() {
               <img
                 src={o.drink_image}
                 alt={o.drink_name}
+                loading="lazy"
+                decoding="async"
                 className="h-20 w-20 shrink-0 rounded-2xl object-cover"
               />
               <div className="min-w-0 flex-1">
