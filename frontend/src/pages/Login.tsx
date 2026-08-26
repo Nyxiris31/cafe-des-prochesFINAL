@@ -1,6 +1,14 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthError, getIdentityConfig, getUser, login, oauthLogin, signup } from "@netlify/identity";
+import {
+  AuthError,
+  getIdentityConfig,
+  getUser,
+  hydrateSession,
+  login,
+  oauthLogin,
+  signup,
+} from "@netlify/identity";
 import { ArrowLeft, Coffee, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiGet } from "@/lib/api";
@@ -16,7 +24,12 @@ function identityErrorMessage(error: unknown): string {
   if (error.status === 403) return "Les inscriptions ne sont pas autorisées sur ce site.";
   if (error.status === 422) return "Vérifie ton email et utilise un mot de passe suffisamment sécurisé.";
   if (error.status === 409) return "Un compte existe déjà avec cet email.";
+  if (error.status === 429) return "Trop de tentatives. Attends quelques instants puis réessaie.";
   return error.message || "La connexion a échoué. Réessaie.";
+}
+
+function safeRedirect(path: string | undefined): string {
+  return path?.startsWith("/") && !path.startsWith("//") ? path : "/commander";
 }
 
 export default function Login() {
@@ -33,22 +46,42 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  if (!loading && user) return <Navigate to={from ?? (user.is_admin ? "/admin" : "/commander")} replace />;
+  if (!loading && user) {
+    return (
+      <Navigate
+        to={from ? safeRedirect(from) : user.is_admin ? "/admin" : "/commander"}
+        replace
+      />
+    );
+  }
 
   const signIn = () => {
+    if (pending) return;
+    setError(null);
+    setNotice(null);
     const identity = getIdentityConfig();
     if (!identity) {
       setError("Le service de connexion n'est pas disponible sur ce site.");
       return;
     }
-    sessionStorage.setItem("auth_redirect", from ?? "/commander");
-    oauthLogin("google");
+    sessionStorage.setItem("auth_redirect", safeRedirect(from));
+    setPending(true);
+    try {
+      oauthLogin("google");
+    } catch (authError) {
+      sessionStorage.removeItem("auth_redirect");
+      setError(identityErrorMessage(authError));
+      setPending(false);
+    }
   };
 
   const finishAuthentication = async () => {
+    await hydrateSession();
     const appUser = await apiGet<User>("/auth/me");
     queryClient.setQueryData(["auth", "me"], appUser);
-    navigate(from ?? (appUser.is_admin ? "/admin" : "/commander"), { replace: true });
+    navigate(from ? safeRedirect(from) : appUser.is_admin ? "/admin" : "/commander", {
+      replace: true,
+    });
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -188,7 +221,8 @@ export default function Login() {
         <button
           type="button"
           onClick={signIn}
-          className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#2a1810] px-8 text-base font-semibold text-[#faf6f0] shadow-lg transition-colors duration-200 hover:bg-[#8a4b20]"
+          disabled={pending}
+          className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#2a1810] px-8 text-base font-semibold text-[#faf6f0] shadow-lg transition-colors duration-200 hover:bg-[#8a4b20] disabled:cursor-not-allowed disabled:opacity-60"
           data-testid="login-google-btn"
         >
           <svg viewBox="0 0 48 48" className="h-5 w-5" aria-hidden="true">

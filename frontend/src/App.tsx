@@ -5,6 +5,7 @@ import Commandes from "@/pages/Commandes";
 import Login from "@/pages/Login";
 import Admin from "@/pages/Admin";
 import AuthCallback from "@/pages/AuthCallback";
+import Profil from "@/pages/Profil";
 import { AuthProvider, RequireAuth } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -22,6 +23,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route
+            path="/profil"
+            element={
+              <RequireAuth>
+                <Profil />
+              </RequireAuth>
+            }
+          />
           <Route
             path="/commander"
             element={

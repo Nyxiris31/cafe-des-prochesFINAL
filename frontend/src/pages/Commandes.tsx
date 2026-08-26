@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -14,6 +14,7 @@ import type { Order } from "@/lib/types";
 
 export default function Commandes() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: orders, isLoading, isError } = useQuery({
     queryKey: ["orders"],
@@ -35,13 +36,16 @@ export default function Commandes() {
     <div className="min-h-screen bg-background" data-testid="commandes-page">
       <header className="border-b border-border bg-[#efe8dc]">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4 md:px-6">
-          <Link
-            to="/"
-            className="inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium text-[#2a1810] transition-colors duration-200 hover:bg-[#f3ece0]"
-            data-testid="orders-back-home-link"
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-[#2a1810] transition-colors duration-200 hover:bg-[#f3ece0]"
+            aria-label="Retourner à la page précédente"
+            title="Retour"
+            data-testid="orders-back-link"
           >
-            <ArrowLeft className="h-4 w-4" /> Accueil
-          </Link>
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           <span className="hidden items-center gap-2 font-heading text-lg tracking-tight sm:flex">
             <Coffee className="h-5 w-5 text-[#8a4b20]" /> Le Café des Proches
           </span>
