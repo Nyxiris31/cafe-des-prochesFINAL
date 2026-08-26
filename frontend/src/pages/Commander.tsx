@@ -255,7 +255,7 @@ export default function Commander() {
                   </p>
                 )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3">
-                  {(shownDrinks ?? []).map((d) => (
+                  {(shownDrinks ?? []).map((d, drinkIndex) => (
                     <div
                       key={d.id}
                       role="button"
@@ -276,7 +276,13 @@ export default function Commander() {
                       }`}
                     >
                       <div className="relative mb-2 aspect-square w-full overflow-hidden rounded-xl border border-[#efe8dc] bg-[#f7f3ee] md:mb-3">
-                        <img src={d.image} alt={d.name} className="h-full w-full object-cover" />
+                        <img
+                          src={d.image}
+                          alt={d.name}
+                          loading={drinkIndex < 3 ? "eager" : "lazy"}
+                          decoding="async"
+                          className="h-full w-full object-cover"
+                        />
                         {!d.available && (
                           <span
                             className="absolute inset-x-0 bottom-0 bg-[#2a1810]/85 py-1.5 text-center text-[10px] font-bold uppercase tracking-wide text-[#faf6f0] md:text-xs"
@@ -341,6 +347,8 @@ export default function Commander() {
             <img
               src={infoDrink.image}
               alt={infoDrink.name}
+              loading="lazy"
+              decoding="async"
               className="aspect-square w-full rounded-2xl border border-border object-cover"
               data-testid="drink-info-large-image"
             />

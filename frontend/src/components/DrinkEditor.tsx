@@ -133,6 +133,8 @@ export default function DrinkEditor({ open, drink, onClose }: Props) {
                 <img
                   src={image}
                   alt="Aperçu"
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                   data-testid="drink-editor-image-preview"
                 />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,6 +18,7 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import type { Drink } from "@/lib/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const CAROUSEL_DELAY = 5000;
 
 export default function Home() {
   const { user } = useAuth();
@@ -27,16 +28,28 @@ export default function Home() {
   });
 
   // The carousel mirrors the live catalog the admin edits (name, image, description).
-  const list = (drinks ?? []).filter((d) => d.available);
+  const list = useMemo(() => (drinks ?? []).filter((d) => d.available), [drinks]);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     if (list.length < 2) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % list.length), 5000);
-    return () => clearInterval(t);
-  }, [list.length]);
+    const t = setTimeout(() => setIndex((i) => (i + 1) % list.length), CAROUSEL_DELAY);
+    return () => clearTimeout(t);
+  }, [index, list.length]);
 
   const current = list[Math.min(index, Math.max(list.length - 1, 0))];
+
+  useEffect(() => {
+    if (!current || list.length < 2) return;
+    const adjacent = [
+      list[(index + 1) % list.length],
+      list[(index - 1 + list.length) % list.length],
+    ];
+    adjacent.forEach((drink) => {
+      const image = new Image();
+      image.src = drink.image;
+    });
+  }, [current, index, list]);
 
   return (
     <div className="min-h-screen bg-background" data-testid="home-page">
@@ -136,6 +149,9 @@ export default function Home() {
                       key={current.id}
                       src={current.image}
                       alt={current.name}
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                       className="h-full w-full object-cover"
                       data-testid="carousel-image"
                       initial={{ opacity: 0, scale: 1.06 }}
