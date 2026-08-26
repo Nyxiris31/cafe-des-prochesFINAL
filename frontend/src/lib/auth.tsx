@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate, useLocation } from "react-router-dom";
-import { AUTH_EVENTS, getUser, logout as identityLogout, onAuthChange } from "@netlify/identity";
+import {
+  AUTH_EVENTS,
+  hydrateSession,
+  logout as identityLogout,
+  onAuthChange,
+} from "@netlify/identity";
 import { apiGet } from "@/lib/api";
-import { clearSessionMarker, hasSessionMarker } from "@/lib/session";
+import { clearSessionMarker, markSession } from "@/lib/session";
 import type { User } from "@/lib/types";
 
 interface AuthValue {
@@ -26,8 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["auth", "me"],
     queryFn: async () => {
       try {
-        if (!hasSessionMarker()) return null;
-        if (!(await getUser())) return null;
+        const identityUser = await hydrateSession();
+        if (!identityUser) return null;
+        markSession();
         return await apiGet<User>("/auth/me");
       } catch {
         return null;
@@ -40,9 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     return onAuthChange((event) => {
       if (event === AUTH_EVENTS.LOGOUT) {
+        clearSessionMarker();
         queryClient.setQueryData(["auth", "me"], null);
-        queryClient.removeQueries({ queryKey: ["orders"] });
       } else {
+        markSession();
         void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
       }
     });

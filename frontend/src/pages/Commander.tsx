@@ -11,6 +11,7 @@ import {
   Flame,
   Info,
   MoveLeft,
+  MoveUp,
   ShieldCheck,
   Snowflake,
 } from "lucide-react";
@@ -50,7 +51,7 @@ function toIsoDate(d: Date): string {
 export default function Commander() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [category, setCategory] = useState<CategoryId>("chaudes");
+  const [category, setCategory] = useState<CategoryId | null>(null);
   const [infoDrink, setInfoDrink] = useState<Drink | null>(null);
   const [bookingDrink, setBookingDrink] = useState<Drink | null>(null);
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -158,11 +159,12 @@ export default function Commander() {
         </header>
 
         <div className="grid flex-1 grid-cols-12 gap-3 pt-5 md:gap-6">
-          <aside className="col-span-5 flex flex-col gap-2 md:col-span-4 lg:col-span-3">
+          <aside className="col-span-12 flex flex-col gap-2 md:col-span-4 lg:col-span-3">
             <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground md:text-xs">
               Catégories
             </p>
-            {CATEGORIES.map((c) => {
+            <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
+              {CATEGORIES.map((c) => {
               const active = category === c.id;
               return (
                 <button
@@ -170,7 +172,7 @@ export default function Commander() {
                   type="button"
                   onClick={() => setCategory(c.id)}
                   data-testid={`kiosk-category-${c.id}-btn`}
-                  className={`flex min-h-24 w-full flex-col items-start justify-center gap-1.5 rounded-2xl border px-3 py-3 text-left transition-colors duration-200 md:min-h-0 md:px-4 md:py-4 ${
+                  className={`flex min-h-20 w-full flex-col items-start justify-center gap-1 rounded-2xl border px-3 py-2.5 text-left transition-colors duration-200 md:min-h-0 md:gap-1.5 md:px-4 md:py-4 ${
                     active
                       ? "border-transparent bg-[#2a1810] text-[#faf6f0] shadow-md"
                       : "border-[#e0d4c5] bg-white text-[#2a1810] hover:bg-[#f3ece0]"
@@ -193,10 +195,11 @@ export default function Commander() {
                   </span>
                 </button>
               );
-            })}
+              })}
+            </div>
           </aside>
 
-          <main className="col-span-7 min-w-0 md:col-span-8 lg:col-span-9">
+          <main className="col-span-12 min-w-0 md:col-span-8 lg:col-span-9">
             {category === null && (
               <div
                 className="flex h-full flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-[#d8cab8] bg-[#f7f3ee] p-5 text-center md:p-10"
@@ -211,8 +214,10 @@ export default function Commander() {
                   <span className="hidden sm:inline">Aucune catégorie sélectionnée, veuillez en choisir une</span>
                 </h2>
                 <p className="inline-flex items-center gap-2 text-xs text-muted-foreground md:text-sm">
-                  <MoveLeft className="h-4 w-4 animate-nudge-left" /> Choisissez une catégorie sur la
-                  gauche
+                  <MoveUp className="h-4 w-4 animate-nudge-up md:hidden" />
+                  <MoveLeft className="hidden h-4 w-4 animate-nudge-left md:block" />
+                  <span className="md:hidden">Choisissez-en une au-dessus</span>
+                  <span className="hidden md:inline">Choisissez-en une à gauche</span>
                 </p>
               </div>
             )}

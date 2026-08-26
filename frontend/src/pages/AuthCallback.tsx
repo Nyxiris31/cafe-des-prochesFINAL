@@ -34,8 +34,11 @@ export default function AuthCallback() {
         window.history.replaceState(null, "", window.location.pathname);
         const redirectTo = sessionStorage.getItem("auth_redirect");
         sessionStorage.removeItem("auth_redirect");
-        navigate(redirectTo ?? (user.is_admin ? "/admin" : "/commander"), { replace: true });
+        const safeRedirect =
+          redirectTo?.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : null;
+        navigate(safeRedirect ?? (user.is_admin ? "/admin" : "/commander"), { replace: true });
       } catch {
+        sessionStorage.removeItem("auth_redirect");
         setError("La connexion a échoué. Réessaie depuis la page de connexion.");
       }
     })();

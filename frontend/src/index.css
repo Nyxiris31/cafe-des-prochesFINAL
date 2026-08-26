@@ -129,8 +129,14 @@
     50% { transform: translateX(-7px); }
 }
 
+@keyframes nudge-up {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+}
+
 .animate-steam { animation: steam-rise 3.2s ease-in-out infinite; }
 .animate-nudge-left { animation: nudge-left 1.8s ease-in-out infinite; }
+.animate-nudge-up { animation: nudge-up 1.8s ease-in-out infinite; }
 
 @layer base {
   * {
